@@ -1,0 +1,16 @@
+{
+  "explorerSort.rules": [
+    {
+      "name": "Node folder structure",
+      "pathPattern": "**",
+      "priorities": [
+        {
+          "condition": "name === 'node_modules'",
+          "priority": 99.9
+        }
+      ]
+    }
+  ],
+  "explorerSort.defaultSort": "name",
+  "explorerSort.showHiddenFiles": true
+}
