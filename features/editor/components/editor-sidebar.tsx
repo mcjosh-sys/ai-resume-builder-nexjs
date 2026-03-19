@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useModal } from "@/hooks/use-modal";
 import { cn } from "@/lib/utils";
-import { Eye, EyeOff, GripVertical, Lock, Plus, Sparkles } from "lucide-react";
+import { Eye, EyeOff, GripVertical, Lock, Plus, Sparkles, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Step, useEditorContext } from "../contexts/editor-context";
 import { FIXED_STEP_IDS } from "../providers/editor-provider";
@@ -33,6 +33,7 @@ export function EditorSidebar() {
     addStep,
     toggleStepEnabled,
     reorderStep,
+    removeStep,
   } = stepper;
   const [filter, setFilter] = useState("");
   const [draggingStepId, setDraggingStepId] = useState<string | null>(null);
@@ -169,37 +170,68 @@ export function EditorSidebar() {
                             Fixed
                           </span>
                         ) : (
-                          <Button
-                            asChild
-                            variant="ghost"
-                            size="icon-sm"
-                            className="size-7"
-                          >
-                            <span
-                              role="button"
-                              tabIndex={0}
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                toggleStepEnabled(step.id);
-                              }}
-                              onKeyDown={(event) => {
-                                if (
-                                  event.key === "Enter" ||
-                                  event.key === " "
-                                ) {
+                          <div className="flex items-center gap-0.5">
+                            <Button
+                              asChild
+                              variant="ghost"
+                              size="icon-sm"
+                              className="size-7"
+                            >
+                              <span
+                                role="button"
+                                tabIndex={0}
+                                onClick={(event) => {
                                   event.stopPropagation();
                                   toggleStepEnabled(step.id);
+                                }}
+                                onKeyDown={(event) => {
+                                  if (
+                                    event.key === "Enter" ||
+                                    event.key === " "
+                                  ) {
+                                    event.stopPropagation();
+                                    toggleStepEnabled(step.id);
+                                  }
+                                }}
+                                aria-label={
+                                  isEnabled
+                                    ? `Turn off ${step.title}`
+                                    : `Turn on ${step.title}`
                                 }
-                              }}
-                              aria-label={
-                                isEnabled
-                                  ? `Turn off ${step.title}`
-                                  : `Turn on ${step.title}`
-                              }
-                            >
-                              <EyeOff className="size-3.5 text-muted-foreground" />
-                            </span>
-                          </Button>
+                              >
+                                <EyeOff className="size-3.5 text-muted-foreground" />
+                              </span>
+                            </Button>
+                            {step.id.startsWith("other-field-") && (
+                              <Button
+                                asChild
+                                variant="ghost"
+                                size="icon-sm"
+                                className="size-7"
+                              >
+                                <span
+                                  role="button"
+                                  tabIndex={0}
+                                  onClick={(event) => {
+                                    event.stopPropagation();
+                                    removeStep(step.id);
+                                  }}
+                                  onKeyDown={(event) => {
+                                    if (
+                                      event.key === "Enter" ||
+                                      event.key === " "
+                                    ) {
+                                      event.stopPropagation();
+                                      removeStep(step.id);
+                                    }
+                                  }}
+                                  aria-label={`Remove ${step.title}`}
+                                >
+                                  <Trash2 className="size-3.5 text-muted-foreground hover:text-destructive" />
+                                </span>
+                              </Button>
+                            )}
+                          </div>
                         )}
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -240,30 +272,61 @@ export function EditorSidebar() {
                           </span>
                         )}
                       </span>
-                      <Button
-                        asChild
-                        variant="ghost"
-                        size="icon-sm"
-                        className="size-7"
-                      >
-                        <span
-                          role="button"
-                          tabIndex={0}
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            toggleStepEnabled(step.id);
-                          }}
-                          onKeyDown={(event) => {
-                            if (event.key === "Enter" || event.key === " ") {
+                      <div className="flex items-center gap-0.5">
+                        <Button
+                          asChild
+                          variant="ghost"
+                          size="icon-sm"
+                          className="size-7"
+                        >
+                          <span
+                            role="button"
+                            tabIndex={0}
+                            onClick={(event) => {
                               event.stopPropagation();
                               toggleStepEnabled(step.id);
-                            }
-                          }}
-                          aria-label={`Turn on ${step.title}`}
-                        >
-                          <Eye className="size-3.5 text-muted-foreground" />
-                        </span>
-                      </Button>
+                            }}
+                            onKeyDown={(event) => {
+                              if (event.key === "Enter" || event.key === " ") {
+                                event.stopPropagation();
+                                toggleStepEnabled(step.id);
+                              }
+                            }}
+                            aria-label={`Turn on ${step.title}`}
+                          >
+                            <Eye className="size-3.5 text-muted-foreground" />
+                          </span>
+                        </Button>
+                        {step.id.startsWith("other-field-") && (
+                          <Button
+                            asChild
+                            variant="ghost"
+                            size="icon-sm"
+                            className="size-7"
+                          >
+                            <span
+                              role="button"
+                              tabIndex={0}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                removeStep(step.id);
+                              }}
+                              onKeyDown={(event) => {
+                                if (
+                                  event.key === "Enter" ||
+                                  event.key === " "
+                                ) {
+                                  event.stopPropagation();
+                                  removeStep(step.id);
+                                }
+                              }}
+                              aria-label={`Remove ${step.title}`}
+                            >
+                              <Trash2 className="size-3.5 text-muted-foreground hover:text-destructive" />
+                            </span>
+                          </Button>
+                        )}
+                      </div>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}

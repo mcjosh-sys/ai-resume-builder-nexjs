@@ -1,8 +1,9 @@
 "use client";
 
+import { useAppSearchParams } from "@/hooks/use-app-search-params";
 import { useResume } from "@/hooks/use-resume";
 import { BaseProps } from "@/types/component.types";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ImSpinner2 } from "react-icons/im";
 import { MobileEditorMode } from "../components/editor-bottom-nav";
 import { AddStepInput, EditorContext, Step } from "../contexts/editor-context";
@@ -76,9 +77,25 @@ export default function EditorProvider({ children }: BaseProps) {
   const [activeDesktopWorkspaceTab, setActiveDesktopWorkspaceTab] = useState<
     "edit" | "preview"
   >("edit");
+  const {
+    watchValues: { id: resumeId },
+    setValues,
+  } = useAppSearchParams({ watchKeys: ["id"] });
   const [mobileSectionsOpen, setMobileSectionsOpen] = useState(false);
-  const resume = useResume({ defaultSteps: DEFAULT_STEPS });
+  const resume = useResume({ resumeId, defaultSteps: DEFAULT_STEPS });
   const stepper = useStepper(resume.steps);
+
+  useEffect(() => {
+    if (resume.currentResumeId && resumeId !== resume.currentResumeId) {
+      setValues({ id: resume.currentResumeId });
+    }
+  }, [resume.currentResumeId, resumeId]);
+
+  useEffect(() => {
+    if (resume.error?.data?.status === 404) {
+      setValues({ id: "" });
+    }
+  }, [resume.error]);
 
   if (resume.isLoading) {
     return (
@@ -116,6 +133,25 @@ export default function EditorProvider({ children }: BaseProps) {
     resume.setSteps((prev) =>
       prev.map((s) => (s.id === stepId ? { ...s, enabled: !s.enabled } : s)),
     );
+  };
+
+  const removeStep = (stepId: string) => {
+    if (!stepId.startsWith("other-field-")) return;
+
+    const enabledSteps = stepper.enabledSteps;
+
+    if (stepper.current?.id === stepId) {
+      if (enabledSteps.length > 1) {
+        const index = enabledSteps.findIndex((s) => s.id === stepId);
+        if (index < enabledSteps.length - 1) {
+          stepper.next();
+        } else {
+          stepper.prev();
+        }
+      }
+    }
+
+    resume.removeSection(stepId);
   };
 
   const reorderStep = (activeStepId: string, overStepId: string) => {
@@ -158,7 +194,7 @@ export default function EditorProvider({ children }: BaseProps) {
   return (
     <EditorContext.Provider
       value={{
-        resume: {
+        resumeState: {
           isLoading: resume.isLoading,
           isSaving: resume.isSaving,
           error: resume.error,
@@ -174,6 +210,7 @@ export default function EditorProvider({ children }: BaseProps) {
           addStep,
           toggleStepEnabled,
           reorderStep,
+          removeStep,
         },
         editorState: {
           activeMobileMode,

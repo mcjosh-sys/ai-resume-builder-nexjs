@@ -23,26 +23,65 @@ export type {
   ResumeTemplateRendererProps,
 } from "./templates/shared";
 
+import { Case, Default, Switch } from "@/components/helpers/app-switch";
 import type { ResumeData } from "./templates/shared";
 
 export function ResumeTemplateRenderer({
   template,
   data,
+  colorHex,
 }: {
   template: ResumeTemplate;
   data: ResumeData;
+  colorHex: string;
 }) {
-  if (template.id === "ember")
-    return <EmberTemplate template={template} data={data} />;
-  if (template.id === "sage")
-    return <SageTemplate template={template} data={data} />;
-  if (template.id === "nova")
-    return <NovaTemplate template={template} data={data} />;
-  if (template.id === "slate")
-    return <SlateTemplate template={template} data={data} />;
-  if (template.id === "prism")
-    return <PrismTemplate template={template} data={data} />;
-  if (template.id === "velvet")
-    return <VelvetTemplate template={template} data={data} />;
-  return <AuroraTemplate template={template} data={data} />;
+  const accentColorMatch = template.accent.match(/bg-([a-z]+)-(\d+)/);
+  const baseColor = accentColorMatch ? accentColorMatch[1] : null;
+  const colorWeight = accentColorMatch ? accentColorMatch[2] : null;
+
+  return (
+    <>
+      {colorHex && colorHex !== "default" && baseColor && colorWeight && (
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
+            .resume-preview-container .bg-${baseColor}-${colorWeight} {
+              background-color: ${colorHex} !important;
+            }
+            .resume-preview-container .text-${baseColor}-${colorWeight} {
+              color: ${colorHex} !important;
+            }
+            .resume-preview-container .border-${baseColor}-${colorWeight} {
+              border-color: ${colorHex} !important;
+            }
+          `,
+          }}
+        />
+      )}
+
+      <Switch expression={template.id}>
+        <Case value="ember">
+          <EmberTemplate template={template} data={data} />
+        </Case>
+        <Case value="sage">
+          <SageTemplate template={template} data={data} />
+        </Case>
+        <Case value="nova">
+          <NovaTemplate template={template} data={data} />
+        </Case>
+        <Case value="slate">
+          <SlateTemplate template={template} data={data} />
+        </Case>
+        <Case value="prism">
+          <PrismTemplate template={template} data={data} />
+        </Case>
+        <Case value="velvet">
+          <VelvetTemplate template={template} data={data} />
+        </Case>
+        <Default>
+          <AuroraTemplate template={template} data={data} />
+        </Default>
+      </Switch>
+    </>
+  );
 }

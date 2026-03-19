@@ -10,15 +10,11 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useEditorContext } from "@/features/editor/contexts/editor-context";
-import {
-  ArrowLeft,
-  ArrowRight,
-  Palette,
-  User,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, Palette, User } from "lucide-react";
 import { useMemo, useState } from "react";
 import AwardsForm from "./forms/awards-form";
 import CertificationsForm from "./forms/certifications-form";
+import CustomSectionForm from "./forms/custom-section-form";
 import EducationForm from "./forms/education-form";
 import { HeaderForm } from "./forms/header-form";
 import ProjectsForm from "./forms/projects-form";
@@ -41,7 +37,7 @@ export function EditorWorkspace({
   selectedTemplate,
   onTemplateChange,
 }: EditorWorkspaceProps) {
-  const { stepper, editorState, resume } = useEditorContext();
+  const { stepper, editorState, resumeState: resume } = useEditorContext();
   const {
     steps,
     current: currentStep,
@@ -169,6 +165,8 @@ export function EditorWorkspace({
         <AwardsForm />
 
         <SkillsForm />
+
+        <CustomSectionForm />
 
         {!currentStep && (
           <div className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground">

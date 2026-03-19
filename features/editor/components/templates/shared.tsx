@@ -61,6 +61,15 @@ export type ResumeAward = {
   description?: string;
 };
 
+export type ResumeOtherField = {
+  id: string;
+  title?: string;
+  subtitle?: string;
+  description?: string;
+  startDate?: string;
+  endDate?: string;
+};
+
 /** A section entry that controls what to render and in what order. */
 export type ResumeSection =
   | { id: "header" }
@@ -95,6 +104,7 @@ export type ResumeData = {
   projects: ResumeProject[];
   certifications: ResumeCertification[];
   awards: ResumeAward[];
+  otherFields: ResumeOtherField[];
 
   /** Ordered list of enabled sections — templates iterate this to determine render order */
   sections: ResumeSection[];

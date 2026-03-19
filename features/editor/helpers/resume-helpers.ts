@@ -283,9 +283,12 @@ export function compileResume(steps: Step[]) {
         break;
       default:
         if (isOtherField) {
+          console.log(step.data);
           const { resumeId, id, ...otherFieldData } = step.data as any;
           otherFields.push({
             ...otherFieldData,
+            startDate: otherFieldData.startDate || undefined,
+            endDate: otherFieldData.endDate || undefined,
             id: otherFieldId!,
           });
         }

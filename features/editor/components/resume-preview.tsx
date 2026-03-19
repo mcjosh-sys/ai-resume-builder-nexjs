@@ -11,6 +11,8 @@ import type { ResumeTemplate } from "./template-selector";
 
 type ResumePreviewProps = {
   template: ResumeTemplate;
+  overrideData?: Partial<ResumeData>;
+  forceColor?: string;
 };
 
 /** Convert editor context steps into the flat ResumeData the templates consume. */
@@ -103,17 +105,62 @@ function stepsToResumeData(steps: Step[]): ResumeData {
       description: a.description,
     })),
 
+    otherFields: steps
+      .filter((s) => s.id.startsWith("other-field-"))
+      .map((s) => {
+        const d = s.data as any;
+        return {
+          id: s.id.replace("other-field-", ""),
+          title: d?.title,
+          subtitle: d?.subtitle,
+          description: d?.description,
+          startDate: d?.startDate,
+          endDate: d?.endDate,
+        };
+      }),
+
     sections,
   };
 }
 
-export function ResumePreview({ template }: ResumePreviewProps) {
-  const { targetRef, dimensions } = useDimensions();
+function ResumePreviewWithContext({
+  template,
+  targetRef,
+  dimensions,
+}: {
+  template: ResumeTemplate;
+  targetRef: any;
+  dimensions: any;
+}) {
   const { stepper, editorState } = useEditorContext();
   const data = stepsToResumeData(stepper.steps);
-  const { colorHex } = editorState;
+  const colorHex = editorState.colorHex;
 
-  // Extract the base tailwind color name from the template accent (e.g. "bg-sky-500" -> "sky-500", "bg-sky-500" -> "sky")
+  return (
+    <ResumePreviewInner
+      template={template}
+      data={data}
+      colorHex={colorHex}
+      targetRef={targetRef}
+      dimensions={dimensions}
+    />
+  );
+}
+
+function ResumePreviewInner({
+  template,
+  data,
+  colorHex,
+  targetRef,
+  dimensions,
+}: {
+  template: ResumeTemplate;
+  data: ResumeData;
+  colorHex: string;
+  targetRef: any;
+  dimensions: any;
+}) {
+  // Extract the base tailwind color name from the template accent 
   const accentColorMatch = template.accent.match(/bg-([a-z]+)-(\d+)/);
   const baseColor = accentColorMatch ? accentColorMatch[1] : null;
   const colorWeight = accentColorMatch ? accentColorMatch[2] : null;
@@ -123,30 +170,58 @@ export function ResumePreview({ template }: ResumePreviewProps) {
       ref={targetRef}
       className="bg-white text-black h-fit w-full aspect-210/297 relative"
     >
-      {/* Dynamically inject styles to override the template's Tailwind color if a custom hex is set */}
-      {colorHex && colorHex !== "default" && baseColor && colorWeight && (
-        <style dangerouslySetInnerHTML={{
-          __html: `
-            .resume-preview-container .bg-${baseColor}-${colorWeight} {
-              background-color: ${colorHex} !important;
-            }
-            .resume-preview-container .text-${baseColor}-${colorWeight} {
-              color: ${colorHex} !important;
-            }
-            .resume-preview-container .border-${baseColor}-${colorWeight} {
-              border-color: ${colorHex} !important;
-            }
-          `
-        }} />
-      )}
       <div
-        style={{
-          zoom: (1 / 794) * dimensions.width,
-        }}
+        style={{ zoom: (1 / 794) * dimensions.width }}
         className="p-6 resume-preview-container h-full w-full"
       >
-        <ResumeTemplateRenderer template={template} data={data} />
+        <ResumeTemplateRenderer
+          template={template}
+          data={data}
+          colorHex={colorHex}
+        />
       </div>
     </div>
   );
 }
+
+export function ResumePreview({
+  template,
+  overrideData,
+  forceColor,
+}: ResumePreviewProps) {
+  const { targetRef, dimensions } = useDimensions();
+
+  if (overrideData) {
+    const data = {
+      sections: [],
+      experience: [],
+      education: [],
+      skills: [],
+      projects: [],
+      certifications: [],
+      awards: [],
+      otherFields: [],
+      ...overrideData,
+    } as ResumeData;
+    
+    return (
+      <ResumePreviewInner
+        template={template}
+        data={data}
+        colorHex={forceColor ?? "default"}
+        targetRef={targetRef}
+        dimensions={dimensions}
+      />
+    );
+  }
+
+  return (
+    <ResumePreviewWithContext
+      template={template}
+      targetRef={targetRef}
+      dimensions={dimensions}
+    />
+  );
+}
+
+

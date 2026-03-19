@@ -206,6 +206,39 @@ export function SlateTemplate({ template, data }: ResumeTemplateRendererProps) {
             </section>
           );
         }
+        if (section.id.startsWith("other-field-")) {
+          const otherFieldId = section.id.replace("other-field-", "");
+          const fieldData = data.otherFields?.find(
+            (f) => f.id === otherFieldId,
+          );
+          if (!fieldData) return null;
+          return (
+            <section key={section.id}>
+              <p className="text-xs font-bold uppercase tracking-widest border-b border-neutral-300 pb-0.5 mb-2">
+                {(section as any).title}
+              </p>
+              <div className="space-y-3">
+                <div>
+                  <div className="flex items-baseline justify-between">
+                    <p className="text-sm font-bold">{fieldData.title}</p>
+                    <span className="text-xs text-neutral-500">
+                      {dateRange(fieldData.startDate, fieldData.endDate)}
+                    </span>
+                  </div>
+                  {fieldData.subtitle && (
+                    <p className="text-xs text-neutral-600 italic">
+                      {fieldData.subtitle}
+                    </p>
+                  )}
+                  <RichText
+                    html={fieldData.description}
+                    className="mt-1 text-neutral-700"
+                  />
+                </div>
+              </div>
+            </section>
+          );
+        }
         return null;
       })}
     </div>

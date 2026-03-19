@@ -96,24 +96,19 @@ export type SkillValues = z.infer<typeof skillSchema>;
 
 export type Skill = NonNullable<z.infer<typeof skillSchema>["skills"]>[number];
 
-export const otherFieldSchema = z.object({
-  otherFields: z
-    .array(
-      z.object({
-        title: optionalString,
-        description: optionalString,
-        startDate: optionalString,
-        endDate: optionalString,
-      }),
-    )
-    .optional(),
-});
+export const otherFieldSchema = z
+  .object({
+    title: optionalString,
+    subtitle: optionalString,
+    description: optionalString,
+    startDate: optionalString,
+    endDate: optionalString,
+  })
+  .optional();
 
 export type OtherFieldValues = z.infer<typeof otherFieldSchema>;
 
-export type OtherField = NonNullable<
-  z.infer<typeof otherFieldSchema>["otherFields"]
->[number];
+export type OtherField = NonNullable<z.infer<typeof otherFieldSchema>>;
 
 export const projectSchema = z.object({
   projects: z
@@ -174,7 +169,7 @@ export const resumeSchema = z.object({
   ...workExperienceSchema.shape,
   ...educationSchema.shape,
   ...skillSchema.shape,
-  ...otherFieldSchema.shape,
+  otherFields: z.array(otherFieldSchema).optional(),
   colorHex: optionalString,
   borderStyle: optionalString,
 });

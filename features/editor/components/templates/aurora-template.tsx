@@ -171,6 +171,34 @@ export function AuroraTemplate({
           );
         }
 
+        if (section.id.startsWith("other-field-")) {
+          const otherFieldId = section.id.replace("other-field-", "");
+          const fieldData = data.otherFields?.find((f) => f.id === otherFieldId);
+          if (fieldData) {
+            return (
+              <section key={section.id} className="space-y-3">
+                <SectionTitle label={(section as any).title} accent={template.accent} />
+                <div className="space-y-1">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="text-sm font-medium">{fieldData.title}</p>
+                      {fieldData.subtitle && (
+                        <p className="text-xs text-muted-foreground">
+                          {fieldData.subtitle}
+                        </p>
+                      )}
+                    </div>
+                    <span className="shrink-0 text-xs text-muted-foreground">
+                      {dateRange(fieldData.startDate, fieldData.endDate)}
+                    </span>
+                  </div>
+                  <RichText html={fieldData.description} />
+                </div>
+              </section>
+            );
+          }
+        }
+
         return null;
       })}
     </div>

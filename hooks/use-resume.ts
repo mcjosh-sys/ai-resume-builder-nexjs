@@ -7,20 +7,16 @@ import { getResume } from "@/features/resume/actions/resume.actions";
 import { AppError } from "@/lib/errors";
 import { createId } from "@paralleldrive/cuid2";
 import { useEffect, useRef, useState } from "react";
-import { useAppSearchParams } from "./use-app-search-params";
 import { useAutoSaveResume } from "./use-auto-save-resume";
 import useUnloadWarning from "./use-unload-warning";
 
 export const useResume = ({
+  resumeId,
   defaultSteps = DEFAULT_STEPS,
 }: {
+  resumeId?: string | null;
   defaultSteps?: Step[];
 } = {}) => {
-  const {
-    watchValues: { id: resumeId },
-    setValues,
-  } = useAppSearchParams({ watchKeys: ["id"] });
-
   const [state, setState] = useState({
     isLoading: false,
     error: null as AppError | null,
@@ -58,12 +54,6 @@ export const useResume = ({
   }, [state.loaded]);
 
   useEffect(() => {
-    if (currentResumeId && resumeId !== currentResumeId) {
-      setValues({ id: currentResumeId });
-    }
-  }, [currentResumeId]);
-
-  useEffect(() => {
     if (!resumeId) return;
 
     const fetchResume = async () => {
@@ -81,8 +71,7 @@ export const useResume = ({
         if (!isMountedRef.current) return;
 
         if (!rawResume) {
-          setValues({ id: "" });
-          return;
+          throw new AppError("Resume not found", { status: 404 });
         }
 
         const parsedResume = parseResume(rawResume);
@@ -157,6 +146,15 @@ export const useResume = ({
     return newSection;
   };
 
+  const removeSection = (stepId: string) => {
+    if (!stepId.startsWith("other-field-")) return;
+    setState((prev) => ({
+      ...prev,
+      steps: prev.steps.filter((s) => s.id !== stepId),
+      changeId: createId(),
+    }));
+  };
+
   const setTemplate = (template: string) => {
     setState((prev) => ({
       ...prev,
@@ -183,6 +181,7 @@ export const useResume = ({
     setSteps,
     updateSection,
     addSection,
+    removeSection,
     setTemplate,
     setColorHex,
   };

@@ -227,6 +227,40 @@ export function VelvetTemplate({
             </section>
           );
         }
+        if (section.id.startsWith("other-field-")) {
+          const otherFieldId = section.id.replace("other-field-", "");
+          const fieldData = data.otherFields?.find(
+            (f) => f.id === otherFieldId,
+          );
+          if (!fieldData) return null;
+          return (
+            <section key={section.id} className="space-y-3">
+              <VelvetSectionTitle
+                label={(section as any).title}
+                accentClass={accentClass}
+              />
+              <div className="space-y-0.5">
+                <div className="flex items-start justify-between gap-2">
+                  <p className="text-sm font-semibold tracking-wide">
+                    {fieldData.title}
+                  </p>
+                  <span className="shrink-0 text-xs text-neutral-400">
+                    {dateRange(fieldData.startDate, fieldData.endDate)}
+                  </span>
+                </div>
+                {fieldData.subtitle && (
+                  <p className="text-xs text-neutral-400 italic">
+                    {fieldData.subtitle}
+                  </p>
+                )}
+                <RichText
+                  html={fieldData.description}
+                  className="text-neutral-600"
+                />
+              </div>
+            </section>
+          );
+        }
         return null;
       })}
     </div>

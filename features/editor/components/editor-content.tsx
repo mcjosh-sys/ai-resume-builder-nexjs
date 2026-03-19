@@ -5,7 +5,7 @@ import { EditorCopilotPanel } from "./editor-copilot-panel";
 import { EditorWorkspace } from "./editor-workspace";
 
 export function EditorContent() {
-  const { editorState, resume } = useEditorContext();
+  const { editorState, resumeState: resume } = useEditorContext();
   const {
     activeMobileMode,
     activeDesktopWorkspaceTab,

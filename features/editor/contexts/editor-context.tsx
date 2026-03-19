@@ -102,8 +102,15 @@ export type AddStepInput = {
   desc?: string;
 };
 
+export type EditorResume = {
+  id?: string;
+  steps: Step[];
+  template: string;
+  colorHex: string;
+};
+
 export type EditorContext = {
-  resume: {
+  resumeState: {
     isLoading: boolean;
     isSaving: boolean;
     error: AppError | null;
@@ -124,6 +131,7 @@ export type EditorContext = {
     addStep: (step: AddStepInput) => void;
     toggleStepEnabled: (stepId: Step["id"]) => void;
     reorderStep: (activeStepId: Step["id"], overStepId: Step["id"]) => void;
+    removeStep: (stepId: string) => void;
   };
   editorState: {
     activeMobileMode: MobileEditorMode;
@@ -223,7 +231,7 @@ export type ResumeSection =
 
 export const EditorContext = createContext<EditorContext>({
   updateSection: () => {},
-  resume: {
+  resumeState: {
     isLoading: false,
     isSaving: false,
     error: null,
@@ -243,6 +251,7 @@ export const EditorContext = createContext<EditorContext>({
     addStep: () => {},
     toggleStepEnabled: () => {},
     reorderStep: () => {},
+    removeStep: () => {},
   },
   editorState: {
     activeMobileMode: "edit",

@@ -229,6 +229,43 @@ export function NovaTemplate({ template, data }: ResumeTemplateRendererProps) {
               ))}
             </section>
           )}
+
+        {data.sections
+          .filter((s) => s.id.startsWith("other-field-"))
+          .map((section) => {
+            const fieldData = data.otherFields?.find(
+              (f) => f.id === section.id.replace("other-field-", "")
+            );
+            if (!fieldData) return null;
+            return (
+              <section key={section.id} className="space-y-3">
+                <p
+                  className={cn(
+                    "text-xs font-bold uppercase tracking-widest",
+                    accentBg.replace("bg-", "text-"),
+                  )}
+                >
+                  {(section as any).title}
+                </p>
+                <div className="space-y-1">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="text-sm font-semibold">{fieldData.title}</p>
+                      {fieldData.subtitle && (
+                        <p className="text-xs text-muted-foreground">
+                          {fieldData.subtitle}
+                        </p>
+                      )}
+                    </div>
+                    <span className="shrink-0 text-xs text-muted-foreground">
+                      {dateRange(fieldData.startDate, fieldData.endDate)}
+                    </span>
+                  </div>
+                  <RichText html={fieldData.description} />
+                </div>
+              </section>
+            );
+          })}
       </main>
     </div>
   );

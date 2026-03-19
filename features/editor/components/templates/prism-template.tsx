@@ -211,6 +211,35 @@ export function PrismTemplate({ template, data }: ResumeTemplateRendererProps) {
               </section>
             );
           }
+          if (section.id.startsWith("other-field-")) {
+            const otherFieldId = section.id.replace("other-field-", "");
+            const fieldData = data.otherFields?.find(
+              (f) => f.id === otherFieldId,
+            );
+            if (!fieldData) return null;
+            return (
+              <section key={section.id} className="space-y-3">
+                <div className={cn("h-0.5 w-8 rounded-full", accentClass)} />
+                <p className="text-xs font-bold uppercase tracking-widest text-neutral-500">
+                  {(section as any).title}
+                </p>
+                <div className="grid grid-cols-[1fr_auto] gap-x-4">
+                  <div className="space-y-0.5">
+                    <p className="text-sm font-bold">{fieldData.title}</p>
+                    {fieldData.subtitle && (
+                      <p className="text-xs text-muted-foreground">
+                        {fieldData.subtitle}
+                      </p>
+                    )}
+                    <RichText html={fieldData.description} className="mt-1" />
+                  </div>
+                  <p className="text-xs text-muted-foreground text-right whitespace-nowrap">
+                    {dateRange(fieldData.startDate, fieldData.endDate)}
+                  </p>
+                </div>
+              </section>
+            );
+          }
           return null;
         })}
       </div>

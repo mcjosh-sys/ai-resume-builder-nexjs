@@ -23,8 +23,12 @@ export function SageTemplate({ template, data }: ResumeTemplateRendererProps) {
   const rightSectionIds = ["experience", "projects"];
 
   const ordered = data.sections.map((s) => s.id);
-  const leftSections = ordered.filter((id) => leftSectionIds.includes(id));
-  const rightSections = ordered.filter((id) => rightSectionIds.includes(id));
+  const leftSections = ordered.filter(
+    (id) => leftSectionIds.includes(id) && !id.startsWith("other-field-"),
+  );
+  const rightSections = ordered.filter(
+    (id) => rightSectionIds.includes(id) || id.startsWith("other-field-"),
+  );
 
   function renderSection(id: string) {
     if (id === "summary" && data.summary) {
@@ -148,6 +152,41 @@ export function SageTemplate({ template, data }: ResumeTemplateRendererProps) {
               />
             </div>
           ))}
+        </div>
+      );
+    }
+    if (id.startsWith("other-field-")) {
+      const fieldData = data.otherFields?.find(
+        (f) => f.id === id.replace("other-field-", ""),
+      );
+      if (!fieldData) return null;
+      const sectionTemplateData = data.sections.find((s) => s.id === id);
+      return (
+        <div key={id} className="space-y-3">
+          <SectionTitle
+            label={(sectionTemplateData as any)?.title || id}
+            accent={template.accent}
+            minimal
+          />
+          <div className="space-y-1">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <p className="text-sm font-semibold">{fieldData.title}</p>
+                {fieldData.subtitle && (
+                  <p className="text-xs text-muted-foreground">
+                    {fieldData.subtitle}
+                  </p>
+                )}
+              </div>
+              <span className="shrink-0 text-xs text-muted-foreground">
+                {dateRange(fieldData.startDate, fieldData.endDate)}
+              </span>
+            </div>
+            <RichText
+              html={fieldData.description}
+              className="text-muted-foreground"
+            />
+          </div>
         </div>
       );
     }

@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { useModal } from "@/hooks/use-modal";
 import { cn } from "@/lib/utils";
-import { Eye, EyeOff, GripVertical, Lock, Plus, Sparkles } from "lucide-react";
+import { Eye, EyeOff, GripVertical, Lock, Plus, Sparkles, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useEditorContext } from "../contexts/editor-context";
 import { AddSectionModal } from "./add-section-modal";
@@ -27,6 +27,7 @@ export function EditorDesktopRail({
     addStep,
     toggleStepEnabled,
     reorderStep,
+    removeStep,
   } = stepper;
   const [filter, setFilter] = useState("");
   const [draggingStepId, setDraggingStepId] = useState<string | null>(null);
@@ -129,27 +130,44 @@ export function EditorDesktopRail({
                   Fixed
                 </span>
               ) : (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  className="size-8"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    toggleStepEnabled(step.id);
-                  }}
-                  aria-label={
-                    isEnabled
-                      ? `Turn off ${step.title}`
-                      : `Turn on ${step.title}`
-                  }
-                >
-                  {isEnabled ? (
-                    <Eye className="size-4" />
-                  ) : (
-                    <EyeOff className="size-4" />
+                <div className="flex items-center gap-0.5">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    className="size-8"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      toggleStepEnabled(step.id);
+                    }}
+                    aria-label={
+                      isEnabled
+                        ? `Turn off ${step.title}`
+                        : `Turn on ${step.title}`
+                    }
+                  >
+                    {isEnabled ? (
+                      <Eye className="size-4" />
+                    ) : (
+                      <EyeOff className="size-4" />
+                    )}
+                  </Button>
+                  {step.id.startsWith("other-field-") && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      className="size-8"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        removeStep(step.id);
+                      }}
+                      aria-label={`Remove ${step.title}`}
+                    >
+                      <Trash2 className="size-4 text-muted-foreground hover:text-destructive" />
+                    </Button>
                   )}
-                </Button>
+                </div>
               )}
             </button>
           );
