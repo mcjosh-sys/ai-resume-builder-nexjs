@@ -3,9 +3,10 @@ import { $Enums, Prisma } from "@/lib/generated/prisma";
 import { parseDateInput } from "@/lib/utils";
 import { WithoutResume } from "@/types";
 import { createId } from "@paralleldrive/cuid2";
-import { ResumeSection, Step } from "../contexts/editor-context";
-import { DEFAULT_STEPS } from "../providers/editor-provider";
+import { TemplateResume } from "../components/resume-template-renderer";
 import { getIconById } from "../resource/icons";
+import { DEFAULT_STEPS } from "../resource/steps";
+import { EditorResume, Step } from "../types/editor-resume.type";
 
 const SectionTypeMap: Record<string, $Enums.SectionType> = {
   education: "EDUCATION",
@@ -18,9 +19,7 @@ const SectionTypeMap: Record<string, $Enums.SectionType> = {
   summary: "SUMMARY",
 };
 
-export function parseResume(resume: RawResume): {
-  steps: Step[];
-} {
+export function parseResume(resume: RawResume): EditorResume {
   const steps = new Map<string, Step>();
   const addedStepIds = new Set<string>();
 
@@ -158,7 +157,12 @@ export function parseResume(resume: RawResume): {
     }
   }
 
-  return { steps: Array.from(steps.values()) };
+  return {
+    id: resume.id,
+    steps: Array.from(steps.values()),
+    template: resume.template ?? "aurora",
+    colorHex: resume.colorHex ?? "default",
+  };
 }
 
 function findStepAndAdd(steps: Step[], id: Step["id"]) {
@@ -183,7 +187,8 @@ function createOtherStep(section: Prisma.SectionCreateManyInput): Step {
   };
 }
 
-export function compileResume(steps: Step[]) {
+export function compileResume(editorResume: EditorResume) {
+  const steps = editorResume.steps;
   const sectionData: WithoutResume<Prisma.SectionCreateManyInput>[] = [];
   const otherFields: WithoutResume<Prisma.OtherFieldCreateInput>[] = [];
   const resumeData: Partial<RawResume> = {};
@@ -283,7 +288,6 @@ export function compileResume(steps: Step[]) {
         break;
       default:
         if (isOtherField) {
-          console.log(step.data);
           const { resumeId, id, ...otherFieldData } = step.data as any;
           otherFields.push({
             ...otherFieldData,
@@ -295,93 +299,128 @@ export function compileResume(steps: Step[]) {
         break;
     }
   }
-
+  resumeData.id = editorResume.id;
   resumeData.sections = sectionData;
   resumeData.otherFields = otherFields;
+  resumeData.template = editorResume.template;
+  resumeData.colorHex = editorResume.colorHex;
 
   return resumeData;
-}
-
-export type FlattenedResume =
-  | {
-      sectionType: "header";
-      data: Extract<ResumeSection, { id: "header" }>["data"];
-    }
-  | {
-      sectionType: "education";
-      data: Extract<ResumeSection, { id: "education" }>["data"];
-    }
-  | {
-      sectionType: "experience";
-      data: Extract<ResumeSection, { id: "experience" }>["data"];
-    }
-  | {
-      sectionType: "skills";
-      data: Extract<ResumeSection, { id: "skills" }>["data"];
-    }
-  | {
-      sectionType: "other-fields";
-      data: Extract<
-        ResumeSection,
-        { id: "other-fields" }
-      >["data"]["otherFields"][number];
-    };
-
-export function flattenResume(
-  resumeSections: ResumeSection[],
-  steps: Step[],
-): FlattenedResume[] {
-  const flattened: FlattenedResume[] = [];
-  for (const step of steps) {
-    switch (step.id) {
-      case "header":
-        flattened.push({
-          sectionType: "header",
-          data: resumeSections.find((section) => section.id === "header")
-            ?.data!,
-        });
-        break;
-      case "education":
-        flattened.push({
-          sectionType: "education",
-          data: resumeSections.find((section) => section.id === "education")
-            ?.data!,
-        });
-        break;
-      case "experience":
-        flattened.push({
-          sectionType: "experience",
-          data: resumeSections.find((section) => section.id === "experience")
-            ?.data!,
-        });
-        break;
-      case "skills":
-        flattened.push({
-          sectionType: "skills",
-          data: resumeSections.find((section) => section.id === "skills")
-            ?.data!,
-        });
-        break;
-      default:
-        if (isOtherFieldStep(step)) {
-          flattened.push({
-            sectionType: "other-fields",
-            data: resumeSections
-              .find((section) => section.id === "other-fields")
-              ?.data.otherFields.find(
-                (otherField) =>
-                  otherField.id === step.id.replace("other-field-", ""),
-              )!,
-          });
-        }
-        break;
-    }
-  }
-  return flattened;
 }
 
 function isOtherFieldStep(
   step: Step,
 ): step is Step & { id: `other-field-${string}` } {
   return step.id.startsWith("other-field-");
+}
+
+export function stepsToTemplateResume(steps: Step[]): TemplateResume {
+  const enabledSteps = steps.filter((s) => s.enabled !== false);
+
+  const sections: TemplateResume["sections"] = enabledSteps
+    .filter((s) => s.id !== "header")
+    .map((s) => ({ id: s.id, title: s.title }));
+
+  const headerStep = steps.find((s) => s.id === "header");
+  const summaryStep = steps.find((s) => s.id === "summary");
+  const experienceStep = steps.find((s) => s.id === "experience");
+  const educationStep = steps.find((s) => s.id === "education");
+  const skillsStep = steps.find((s) => s.id === "skills");
+  const projectsStep = steps.find((s) => s.id === "projects");
+  const certificationsStep = steps.find((s) => s.id === "certifications");
+  const awardsStep = steps.find((s) => s.id === "awards");
+
+  return {
+    // header
+    photoUrl: headerStep?.data?.photoUrl ?? "/images/template-avatar.svg",
+    firstName: headerStep?.data?.firstName,
+    lastName: headerStep?.data?.lastName,
+    jobTitle: headerStep?.data?.jobTitle,
+    email: headerStep?.data?.email,
+    phone: headerStep?.data?.phone,
+    city: headerStep?.data?.city,
+    country: headerStep?.data?.country,
+    links: (headerStep?.data?.links ?? []).map((l: any) => ({
+      name: l.name ?? "",
+      url: l.url ?? "",
+    })),
+
+    // summary
+    summary: summaryStep?.data?.summary ?? headerStep?.data?.summary,
+
+    // sections
+    experience: (experienceStep?.data?.workExperiences ?? []).map((e: any) => ({
+      position: e.position,
+      company: e.company,
+      city: e.city,
+      country: e.country,
+      startDate: e.startDate,
+      endDate: e.endDate,
+      isCurrent: e.isCurrent,
+      description: e.description,
+    })),
+
+    education: (educationStep?.data?.educations ?? []).map((e: any) => ({
+      degree: e.degree,
+      school: e.school,
+      city: e.city,
+      country: e.country,
+      startDate: e.startDate,
+      endDate: e.endDate,
+      isCurrent: e.isCurrent,
+      description: e.description,
+    })),
+
+    skills: (skillsStep?.data?.skills ?? []).map((s: any) => ({
+      name: s.name,
+      level: s.level,
+      category: s.category,
+    })),
+
+    projects: (projectsStep?.data?.projects ?? []).map((p: any) => ({
+      title: p.title,
+      description: p.description,
+      url: p.url,
+      startDate: p.startDate,
+      endDate: p.endDate,
+    })),
+
+    certifications: (certificationsStep?.data?.certifications ?? []).map(
+      (c: any) => ({
+        name: c.name,
+        issuer: c.issuer,
+        issueDate: c.issueDate,
+        expiryDate: c.expiryDate,
+        credentialUrl: c.credentialUrl,
+      }),
+    ),
+
+    awards: (awardsStep?.data?.awards ?? []).map((a: any) => ({
+      title: a.title,
+      issuer: a.issuer,
+      date: a.date,
+      description: a.description,
+    })),
+
+    otherFields: steps
+      .filter((s) => s.id.startsWith("other-field-"))
+      .map((s) => {
+        const d = s.data as any;
+        return {
+          id: s.id.replace("other-field-", ""),
+          title: d?.title,
+          subtitle: d?.subtitle,
+          description: d?.description,
+          startDate: d?.startDate,
+          endDate: d?.endDate,
+        };
+      }),
+
+    sections,
+  };
+}
+
+export function parseResumeToTemplateResume(resume: RawResume): TemplateResume {
+  const steps = parseResume(resume);
+  return stepsToTemplateResume(steps.steps);
 }

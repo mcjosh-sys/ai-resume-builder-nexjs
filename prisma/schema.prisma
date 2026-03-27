@@ -47,6 +47,7 @@ model Resume {
   colorHex        String           @default("default")
   template      String           @default("aurora")
   borderStyle     BorderStyle      @default(SQUIRCLE)
+  atsScore        Int?              @default(0)
   summary         String?
   firstName       String?
   lastName        String?
@@ -64,6 +65,7 @@ model Resume {
   projects        Project[]
   certifications  Certification[]
   awards          Award[]
+  
 
   isDeleted Boolean @default(false)
 

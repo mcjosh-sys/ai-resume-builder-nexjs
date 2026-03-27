@@ -38,10 +38,15 @@ export function buildSearchParams(params: Record<string, any>, prefix = "") {
   return searchParams.toString();
 }
 
-export function parseDateInput(value: any) {
-  if (!value) return "";
+export function isValidDate(value: any) {
+  if (!value) return false;
   const date = new Date(value);
-  if (isNaN(date.getTime())) return "";
+  return !isNaN(date.getTime());
+}
+
+export function parseDateInput(value: any) {
+  if (!value || !isValidDate(value)) return "";
+  const date = new Date(value);
   return date.toISOString().slice(0, 10);
 }
 
@@ -68,5 +73,46 @@ export function isUrl(value: any) {
     return true;
   } catch (error) {
     return false;
+  }
+}
+
+export function downalodObject(filename: string, blob: Blob) {
+  if (typeof window === "undefined") return;
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+}
+
+export function sanitizeAndParseJson<T = unknown>(raw: string): T {
+  try {
+    return JSON.parse(raw);
+  } catch {
+    // محاولة تنظيف الرد
+    let cleaned = raw.trim();
+
+    // Remove ```json ... ``` or ``` ... ```
+    if (cleaned.startsWith("```")) {
+      cleaned = cleaned
+        .replace(/^```[a-zA-Z]*\n?/, "") // remove opening ```json
+        .replace(/```$/, ""); // remove closing ```
+    }
+
+    // Remove stray backticks anywhere
+    cleaned = cleaned.replace(/```/g, "");
+
+    // Optional: extract JSON if wrapped with text
+    const firstBrace = cleaned.indexOf("{");
+    const lastBrace = cleaned.lastIndexOf("}");
+
+    if (firstBrace !== -1 && lastBrace !== -1) {
+      cleaned = cleaned.slice(firstBrace, lastBrace + 1);
+    }
+
+    return JSON.parse(cleaned);
   }
 }

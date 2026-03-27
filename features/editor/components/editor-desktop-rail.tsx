@@ -8,7 +8,7 @@ import { useMemo, useState } from "react";
 import { useEditorContext } from "../contexts/editor-context";
 import { AddSectionModal } from "./add-section-modal";
 
-import { FIXED_STEP_IDS } from "../providers/editor-provider";
+import { FIXED_STEP_IDS } from "../resource/steps";
 
 type EditorDesktopRailProps = {
   className?: string;

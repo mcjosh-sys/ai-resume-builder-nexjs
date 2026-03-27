@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Modal } from "@/hooks/use-modal";
 import { useMemo, useState } from "react";
 
-import { Step } from "../contexts/editor-context";
+import { Step } from "../types/editor-resume.type";
 import { ICON_OPTIONS } from "../resource/icons";
 
 type AddSectionModalProps = {

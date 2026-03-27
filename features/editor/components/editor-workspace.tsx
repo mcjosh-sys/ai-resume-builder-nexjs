@@ -11,7 +11,8 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { useEditorContext } from "@/features/editor/contexts/editor-context";
 import { ArrowLeft, ArrowRight, Palette, User } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
+import { RESUME_TEMPLATES } from "../resource/templates";
 import AwardsForm from "./forms/awards-form";
 import CertificationsForm from "./forms/certifications-form";
 import CustomSectionForm from "./forms/custom-section-form";
@@ -22,7 +23,7 @@ import SkillsForm from "./forms/skills-form";
 import SummaryForm from "./forms/summary-form";
 import WorkExperienceForm from "./forms/work-experience-form";
 import { ResumePreview } from "./resume-preview";
-import { RESUME_TEMPLATES, TemplateSelector } from "./template-selector";
+import { TemplateSelector2 } from "./template-selector-2";
 
 type EditorWorkspaceProps = {
   mode: "edit" | "preview";
@@ -45,7 +46,7 @@ export function EditorWorkspace({
     prev: prevStep,
   } = stepper;
   const { colorHex, setColorHex } = editorState;
-  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
+
 
   const enabledSteps = useMemo(
     () => steps.filter((step) => step.enabled !== false),
@@ -102,26 +103,12 @@ export function EditorWorkspace({
               </Button>
             </div>
 
-            <Button
-              variant="outline"
-              onClick={() => setShowTemplateSelector((value) => !value)}
-              type="button"
-              className="h-full flex-1 sm:flex-none"
-            >
-              Change Template
-            </Button>
+            <TemplateSelector2
+              selectedId={selectedTemplate}
+              onSelect={onTemplateChange}
+            />
           </div>
         </div>
-
-        {showTemplateSelector && (
-          <TemplateSelector
-            selectedId={selectedTemplate}
-            onSelect={(id) => {
-              onTemplateChange(id);
-              setShowTemplateSelector(false);
-            }}
-          />
-        )}
 
         <ResumePreview template={template} />
       </div>

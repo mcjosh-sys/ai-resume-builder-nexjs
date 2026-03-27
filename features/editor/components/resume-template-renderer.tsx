@@ -1,6 +1,4 @@
-"use client";
-
-import type { ResumeTemplate } from "./template-selector";
+import type { ResumeTemplate } from "../resource/templates";
 import { AuroraTemplate } from "./templates/aurora-template";
 import { EmberTemplate } from "./templates/ember-template";
 import { NovaTemplate } from "./templates/nova-template";
@@ -13,7 +11,6 @@ import { VelvetTemplate } from "./templates/velvet-template";
 export type {
   ResumeAward,
   ResumeCertification,
-  ResumeData,
   ResumeEducation,
   ResumeExperience,
   ResumeLink,
@@ -21,10 +18,11 @@ export type {
   ResumeSection,
   ResumeSkill,
   ResumeTemplateRendererProps,
+  TemplateResume,
 } from "./templates/shared";
 
 import { Case, Default, Switch } from "@/components/helpers/app-switch";
-import type { ResumeData } from "./templates/shared";
+import type { TemplateResume } from "./templates/shared";
 
 export function ResumeTemplateRenderer({
   template,
@@ -32,7 +30,7 @@ export function ResumeTemplateRenderer({
   colorHex,
 }: {
   template: ResumeTemplate;
-  data: ResumeData;
+  data: TemplateResume;
   colorHex: string;
 }) {
   const accentColorMatch = template.accent.match(/bg-([a-z]+)-(\d+)/);

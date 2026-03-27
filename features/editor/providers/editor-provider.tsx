@@ -5,71 +5,12 @@ import { useResume } from "@/hooks/use-resume";
 import { BaseProps } from "@/types/component.types";
 import { useEffect, useState } from "react";
 import { ImSpinner2 } from "react-icons/im";
+import { toast } from "sonner";
 import { MobileEditorMode } from "../components/editor-bottom-nav";
-import { AddStepInput, EditorContext, Step } from "../contexts/editor-context";
+import { EditorContext } from "../contexts/editor-context";
 import { useStepper } from "../hooks/use-stepper";
-import { ICON_MAP } from "../resource/icons";
-
-export const FIXED_STEP_IDS = ["header", "summary"] as const;
-
-export const DEFAULT_STEPS: Step[] = [
-  {
-    id: "header",
-    title: "Header",
-    icon: ICON_MAP.contact,
-    sidebarDesc: "Name, role, contact, summary",
-    enabled: true,
-  },
-  {
-    id: "summary",
-    title: "Summary",
-    icon: ICON_MAP.user,
-    sidebarDesc: "Name, role, contact, summary",
-    enabled: true,
-  },
-  {
-    id: "experience",
-    title: "Experience",
-    icon: ICON_MAP.briefcase,
-    sidebarDesc: "Work history",
-    enabled: true,
-  },
-  {
-    id: "education",
-    title: "Education",
-    icon: ICON_MAP.book,
-    sidebarDesc: "Degrees, schools",
-    enabled: true,
-  },
-  {
-    id: "skills",
-    title: "Skills",
-    sidebarDesc: "Skills",
-    icon: ICON_MAP.code,
-    enabled: true,
-  },
-  {
-    id: "projects",
-    title: "Projects",
-    icon: ICON_MAP.folder,
-    sidebarDesc: "Personal & professional projects",
-    enabled: true,
-  },
-  {
-    id: "certifications",
-    title: "Certifications",
-    icon: ICON_MAP.award,
-    sidebarDesc: "Licenses & credentials",
-    enabled: true,
-  },
-  {
-    id: "awards",
-    title: "Awards",
-    icon: ICON_MAP.star,
-    sidebarDesc: "Achievements & recognition",
-    enabled: true,
-  },
-] as const;
+import { DEFAULT_STEPS, FIXED_STEP_IDS } from "../resource/steps";
+import { AddStepInput } from "../types/editor-resume.type";
 
 export default function EditorProvider({ children }: BaseProps) {
   const [activeMobileMode, setActiveMobileMode] =
@@ -86,14 +27,15 @@ export default function EditorProvider({ children }: BaseProps) {
   const stepper = useStepper(resume.steps);
 
   useEffect(() => {
-    if (resume.currentResumeId && resumeId !== resume.currentResumeId) {
-      setValues({ id: resume.currentResumeId });
-    }
-  }, [resume.currentResumeId, resumeId]);
+    setValues({ id: resume.currentResumeId });
+  }, [resume.currentResumeId]);
 
   useEffect(() => {
-    if (resume.error?.data?.status === 404) {
-      setValues({ id: "" });
+    const status = resume.error?.data?.status;
+    if ([404, 500].includes(status)) {
+      toast.error(
+        status === 404 ? "Resume not found" : "Could not load resume",
+      );
     }
   }, [resume.error]);
 
@@ -194,6 +136,7 @@ export default function EditorProvider({ children }: BaseProps) {
   return (
     <EditorContext.Provider
       value={{
+        currentResumeId: resume.currentResumeId,
         resumeState: {
           isLoading: resume.isLoading,
           isSaving: resume.isSaving,
@@ -201,6 +144,7 @@ export default function EditorProvider({ children }: BaseProps) {
           lastSaved: resume.lastSaved,
           hasUnsavedChanges: resume.hasUnsavedChanges,
           currentResumeId: resume.currentResumeId,
+          save: resume.save,
         },
         updateSection: resume.updateSection,
         stepper: {

@@ -1,5 +1,3 @@
-"use client";
-
 import {
   ContactLine,
   RichText,
@@ -173,11 +171,16 @@ export function AuroraTemplate({
 
         if (section.id.startsWith("other-field-")) {
           const otherFieldId = section.id.replace("other-field-", "");
-          const fieldData = data.otherFields?.find((f) => f.id === otherFieldId);
+          const fieldData = data.otherFields?.find(
+            (f) => f.id === otherFieldId,
+          );
           if (fieldData) {
             return (
               <section key={section.id} className="space-y-3">
-                <SectionTitle label={(section as any).title} accent={template.accent} />
+                <SectionTitle
+                  label={(section as any).title}
+                  accent={template.accent}
+                />
                 <div className="space-y-1">
                   <div className="flex items-start justify-between gap-2">
                     <div>

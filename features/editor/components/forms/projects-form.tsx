@@ -1,3 +1,4 @@
+import RichTextEditor2 from "@/components/rich-text-editor-2";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -8,7 +9,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { cn, parseDateInput } from "@/lib/utils";
 import { projectSchema, ProjectValues } from "@/lib/validation";
 import {
@@ -34,7 +34,8 @@ import { isEqual } from "lodash";
 import { GripHorizontal } from "lucide-react";
 import { useEffect } from "react";
 import { useFieldArray, useForm, UseFormReturn } from "react-hook-form";
-import { FormCompProps, useEditorContext } from "../../contexts/editor-context";
+import { useEditorContext } from "../../contexts/editor-context";
+import { FormCompProps } from "../../types/editor-resume.type";
 
 function _ProjectsForm({ data, onChange }: FormCompProps<"projects">) {
   const form = useForm<ProjectValues>({
@@ -235,11 +236,7 @@ function ProjectItem({ id, form, index, remove }: ProjectItemProps) {
           <FormItem>
             <FormLabel>Description</FormLabel>
             <FormControl>
-              <Textarea
-                {...field}
-                rows={3}
-                placeholder="Briefly describe what the project does and your role..."
-              />
+              <RichTextEditor2 value={field.value} onChange={field.onChange} />
             </FormControl>
             <FormMessage />
           </FormItem>

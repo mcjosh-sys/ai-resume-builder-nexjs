@@ -1,5 +1,3 @@
-"use client";
-
 import { cn } from "@/lib/utils";
 import {
   RichText,
@@ -195,11 +193,17 @@ export function EmberTemplate({ template, data }: ResumeTemplateRendererProps) {
 
         if (section.id.startsWith("other-field-")) {
           const otherFieldId = section.id.replace("other-field-", "");
-          const fieldData = data.otherFields?.find((f) => f.id === otherFieldId);
+          const fieldData = data.otherFields?.find(
+            (f) => f.id === otherFieldId,
+          );
           if (fieldData) {
             return (
               <section key={section.id} className="space-y-3">
-                <SectionTitle label={(section as any).title} accent={template.accent} dark />
+                <SectionTitle
+                  label={(section as any).title}
+                  accent={template.accent}
+                  dark
+                />
                 <div className="space-y-1 border-l-2 border-muted pl-3">
                   <div className="flex items-start justify-between gap-2">
                     <div>

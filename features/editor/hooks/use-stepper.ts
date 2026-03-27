@@ -2,7 +2,7 @@
 
 import { useAppSearchParams } from "@/hooks/use-app-search-params";
 import { useEffect, useMemo } from "react";
-import { Step } from "../contexts/editor-context";
+import { Step } from "../types/editor-resume.type";
 
 export const useStepper = (steps: Step[]) => {
   const enabledSteps = useMemo(
@@ -16,6 +16,7 @@ export const useStepper = (steps: Step[]) => {
   } = useAppSearchParams({ watchKeys: ["step"] });
 
   const currentIndex = useMemo(() => {
+    if (!stepId) return 0;
     const index = enabledSteps.findIndex((s) => s.id === stepId);
     return index === -1 ? 0 : index;
   }, [enabledSteps, stepId]);
@@ -26,7 +27,7 @@ export const useStepper = (steps: Step[]) => {
   const hasPrevStep = currentIndex > 0;
 
   useEffect(() => {
-    if (!enabledSteps.length) return;
+    if (!enabledSteps.length || !stepId) return;
 
     const validStepId = enabledSteps[currentIndex]?.id;
     if (stepId !== validStepId) {

@@ -1,5 +1,3 @@
-"use client";
-
 import { cn } from "@/lib/utils";
 import {
   RichText,
@@ -234,7 +232,7 @@ export function NovaTemplate({ template, data }: ResumeTemplateRendererProps) {
           .filter((s) => s.id.startsWith("other-field-"))
           .map((section) => {
             const fieldData = data.otherFields?.find(
-              (f) => f.id === section.id.replace("other-field-", "")
+              (f) => f.id === section.id.replace("other-field-", ""),
             );
             if (!fieldData) return null;
             return (

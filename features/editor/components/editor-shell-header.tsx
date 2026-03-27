@@ -1,28 +1,26 @@
 "use client";
 
+import { DownloadPdfButton } from "@/components/download-pdf-button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/ui/logo";
 import { useSidebar } from "@/components/ui/sidebar";
-import { RESUME_TEMPLATES } from "@/features/editor/components/template-selector";
-import { Download, Menu, Save, Settings } from "lucide-react";
+import { useFromNow } from "@/hooks/use-from-now";
+import { Menu, Save, Settings } from "lucide-react";
+import { ComponentProps } from "react";
 import { useEditorContext } from "../contexts/editor-context";
 
-type EditorShellHeaderProps = {
-  selectedTemplate: string;
-  onTemplateChange: (id: string) => void;
-  onOpenSections: () => void;
-};
-
 export function EditorShellHeader() {
-  const { editorState } = useEditorContext();
   const {
-    selectedTemplate,
-    setSelectedTemplate,
-    setActiveDesktopWorkspaceTab,
-    setMobileSectionsOpen,
-  } = editorState;
+    editorState,
+    resumeState: { lastSaved, isSaving },
+    stepper: { steps },
+    currentResumeId,
+  } = useEditorContext();
+
+  const { selectedTemplate, setSelectedTemplate, colorHex } = editorState;
   const sidebar = useSidebar();
+  const fromNow = useFromNow(lastSaved);
   return (
     <>
       <header className="sticky top-0 z-40 border-b bg-background xm:hidden">
@@ -40,19 +38,30 @@ export function EditorShellHeader() {
             </Button>
             <div>
               <p className="text-xl font-semibold leading-tight">My Resume</p>
-              <p className="text-sm text-muted-foreground">
-                Last saved: 2m ago
-              </p>
+              {fromNow && (
+                <p className="text-sm text-muted-foreground">
+                  Last saved: {fromNow}
+                </p>
+              )}
             </div>
           </div>
           <div className="flex items-center gap-1">
             <ThemeToggle />
-            <Button variant="ghost" size="icon-sm" aria-label="Save">
-              <Save className="size-5" />
-            </Button>
-            <Button variant="ghost" size="icon-sm" aria-label="Download">
-              <Download className="size-5" />
-            </Button>
+            <SaveButton
+              variant="ghost"
+              size="icon-sm"
+              aria-label="Save"
+              iconOnly
+            />
+            <DownloadPdfButton
+              variant="ghost"
+              size="icon-sm"
+              aria-label="Download"
+              steps={steps}
+              template={selectedTemplate}
+              colorHex={colorHex}
+              type="button"
+            />
             <Button variant="ghost" size="icon-sm" aria-label="Settings">
               <Settings className="size-5" />
             </Button>
@@ -60,7 +69,7 @@ export function EditorShellHeader() {
         </div>
       </header>
 
-      <header className="fixed h-18 inset-x-0 top-0 z-40 hidden border-b bg-background xm:block">
+      <header className="fixed h-18 inset-x-0 top-0 z-40 hidden border-b bg-background md:block">
         <div className="flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
             <Logo /> |
@@ -69,7 +78,7 @@ export function EditorShellHeader() {
 
           <div className="flex items-center gap-3">
             <ThemeToggle />
-            <select
+            {/* <select
               value={selectedTemplate}
               onChange={(event) => setSelectedTemplate(event.target.value)}
               className="h-10 rounded-md border bg-background px-3 text-sm"
@@ -80,19 +89,42 @@ export function EditorShellHeader() {
                   {template.name} Template
                 </option>
               ))}
-            </select>
+            </select> */}
 
-            <Button variant="outline" type="button">
-              <Save />
-              Save
-            </Button>
-            <Button type="button">
-              <Download />
+            <SaveButton variant="outline" />
+            <DownloadPdfButton
+              steps={steps}
+              template={selectedTemplate}
+              colorHex={colorHex}
+              type="button"
+            >
+              {/* <Download /> */}
               Download PDF
-            </Button>
+            </DownloadPdfButton>
           </div>
         </div>
       </header>
     </>
+  );
+}
+
+function SaveButton({
+  onClick: _,
+  iconOnly = false,
+  ...props
+}: ComponentProps<typeof Button> & { iconOnly?: boolean }) {
+  const {
+    resumeState: { isSaving, hasUnsavedChanges, save },
+  } = useEditorContext();
+  return (
+    <Button
+      onClick={save}
+      type="button"
+      {...props}
+      disabled={isSaving || !hasUnsavedChanges}
+    >
+      <Save />
+      {iconOnly ? "" : "Save"}
+    </Button>
   );
 }

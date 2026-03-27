@@ -3,9 +3,11 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { useResumeAI } from "@/hooks/use-resume-ai";
 import { cn } from "@/lib/utils";
 import { Sparkles, WandSparkles, Zap } from "lucide-react";
 import { useState } from "react";
+import { useEditorContext } from "../contexts/editor-context";
 
 type EditorCopilotPanelProps = {
   mobile?: boolean;
@@ -15,23 +17,49 @@ const QUICK_ACTIONS = [
   { id: "rewrite", label: "Rewrite with AI", icon: WandSparkles },
   { id: "bullets", label: "Improve Bullet Points", icon: Zap },
   { id: "tailor", label: "Tailor to Job", icon: Sparkles },
-];
+] as const;
 
-export function EditorCopilotPanel({ mobile = false }: EditorCopilotPanelProps) {
+export function EditorCopilotPanel({
+  mobile = false,
+}: EditorCopilotPanelProps) {
   const [activeTab, setActiveTab] = useState<"actions" | "suggestions">(
-    "actions"
+    "actions",
   );
 
+  const {
+    stepper: { steps },
+    editorState: { selectedTemplate, colorHex },
+  } = useEditorContext();
+
+  const { status, error, rewrite } = useResumeAI({
+    steps,
+    template: selectedTemplate,
+    colorHex,
+  });
+
+  const quickActionHandlers = {
+    rewrite: () => {
+      rewrite();
+    },
+  };
+
   return (
-    <div className={cn("space-y-4", mobile && "space-y-5")}> 
-      <div className={cn("rounded-xl border bg-violet-50/60 p-4", mobile && "bg-violet-50")}> 
+    <div className={cn("space-y-4", mobile && "space-y-5")}>
+      <div
+        className={cn(
+          "rounded-xl border bg-violet-50/60 p-4",
+          mobile && "bg-violet-50",
+        )}
+      >
         <div className="flex items-center gap-3">
           <div className="rounded-xl bg-linear-to-br from-violet-500 to-blue-500 p-2 text-white">
             <Sparkles className="size-6" />
           </div>
           <div>
             <p className="text-3xl font-semibold">AI Copilot</p>
-            <p className="text-muted-foreground">Your intelligent writing assistant</p>
+            <p className="text-muted-foreground">
+              Your intelligent writing assistant
+            </p>
           </div>
         </div>
 
@@ -43,7 +71,7 @@ export function EditorCopilotPanel({ mobile = false }: EditorCopilotPanelProps) 
                 onClick={() => setActiveTab("actions")}
                 className={cn(
                   "rounded-full px-3 py-2 text-sm font-semibold",
-                  activeTab === "actions" && "bg-background"
+                  activeTab === "actions" && "bg-background",
                 )}
               >
                 Quick Actions
@@ -53,7 +81,7 @@ export function EditorCopilotPanel({ mobile = false }: EditorCopilotPanelProps) 
                 onClick={() => setActiveTab("suggestions")}
                 className={cn(
                   "rounded-full px-3 py-2 text-sm font-semibold",
-                  activeTab === "suggestions" && "bg-background"
+                  activeTab === "suggestions" && "bg-background",
                 )}
               >
                 Suggestions 3
@@ -76,6 +104,7 @@ export function EditorCopilotPanel({ mobile = false }: EditorCopilotPanelProps) 
                   key={action.id}
                   type="button"
                   className="flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left text-lg font-medium hover:bg-muted/40"
+                  onClick={() => (quickActionHandlers as any)[action.id]?.()}
                 >
                   <span className="rounded-lg bg-muted p-2">
                     <Icon className="size-4" />
@@ -114,7 +143,8 @@ export function EditorCopilotPanel({ mobile = false }: EditorCopilotPanelProps) 
             <CardContent className="space-y-3 pt-4">
               <div className="rounded-xl border border-violet-200 bg-violet-50 p-4">
                 <p className="text-lg text-slate-700">
-                  Add metrics to your bullet points to quantify your achievements.
+                  Add metrics to your bullet points to quantify your
+                  achievements.
                 </p>
                 <Button variant="outline" className="mt-3 w-full">
                   Apply Suggestion

@@ -28,6 +28,8 @@ export type RawResume = {
   projects?: Prisma.ProjectCreateManyResumeInput[];
   certifications?: Prisma.CertificationCreateManyResumeInput[];
   awards?: Prisma.AwardCreateManyResumeInput[];
+  updatedAt?: Date;
+  createdAt?: Date;
 };
 
 export async function getResume(id: string) {
@@ -60,6 +62,38 @@ export async function getResume(id: string) {
   return resume;
 }
 
+function calculateAtsScore(data: Partial<RawResume>): number {
+  let atsScore = 0;
+
+  // Core profile (30%)
+  if (data.firstName && data.lastName) atsScore += 10;
+  if (data.summary && data.summary.length > 50) atsScore += 20;
+
+  // Experience (30%)
+  const expCount = data.workExperiences?.length || 0;
+  if (expCount > 0) {
+    atsScore += Math.min(30, expCount * 10);
+  }
+
+  // Education (15%)
+  const eduCount = data.educations?.length || 0;
+  if (eduCount > 0) atsScore += 15;
+
+  // Skills (15%)
+  const skillsCount = data.skills?.length || 0;
+  if (skillsCount > 4) atsScore += 15;
+  else if (skillsCount > 0) atsScore += 5;
+
+  // Extras (10%)
+  const projCount = data.projects?.length || 0;
+  const certCount = data.certifications?.length || 0;
+  if (projCount > 0 || certCount > 0) {
+    atsScore += 10;
+  }
+
+  return atsScore;
+}
+
 export async function createResume(
   userId: string,
   data: Omit<RawResume, "id" | "photoUrl">,
@@ -77,10 +111,14 @@ export async function createResume(
     phone: _,
     ...rest
   } = data;
+
+  const atsScore = calculateAtsScore(data);
+
   return await prisma.resume.create({
     data: {
       ...rest,
       userId,
+      atsScore,
       workExperiences: {
         create: workExperiences,
       },
@@ -127,15 +165,18 @@ export async function updateResume(
     projects,
     certifications,
     awards,
-    phone: _,
+    photo: _,
     ...rest
   } = data;
-  console.log({ sections });
+
+  const atsScore = calculateAtsScore(data);
+
   return await prisma.resume.update({
     where: { id, userId },
     data: {
       ...rest,
       userId,
+      atsScore,
       links: {
         deleteMany: {},
         create: links?.filter((link) => link.name && link.url) as any,
@@ -176,6 +217,43 @@ export async function updateResume(
   });
 }
 
+export async function getUserResumes(limit?: number) {
+  const userId = await getUserId();
+  return prisma.resume.findMany({
+    where: { userId, isDeleted: false },
+    orderBy: { updatedAt: "desc" },
+    ...(limit ? { take: limit } : {}),
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      template: true,
+      photoUrl: true,
+      firstName: true,
+      lastName: true,
+      updatedAt: true,
+      createdAt: true,
+      atsScore: true,
+    },
+  });
+}
+
+export async function deleteResume(id: string) {
+  const userId = await getUserId();
+  return prisma.resume.update({
+    where: { id, userId },
+    data: { isDeleted: true },
+  });
+}
+
+export async function renameResume(id: string, title: string) {
+  const userId = await getUserId();
+  return prisma.resume.update({
+    where: { id, userId },
+    data: { title },
+  });
+}
+
 export async function saveResume(data: RawResume) {
   const { id, photo, ...rest } = data;
   const userId = await getUserId();
@@ -187,19 +265,16 @@ export async function saveResume(data: RawResume) {
     throw new AppError("Resume not found", { status: 404 });
   }
 
-  let newPhotoUrl: string | null | undefined = null;
+  let newPhotoUrl: string | null | undefined = rest.photoUrl;
   const fileKey = existing?.photoUrl?.split("/").pop();
-  console.log({ fileKey });
   if (photo instanceof File) {
     if (fileKey) {
-      const res = await deleteImage(fileKey);
-      console.log(res);
+      await deleteImage(fileKey);
     }
     newPhotoUrl = await uploadImage(photo, userId);
   } else if (photo === null) {
     if (fileKey) {
-      const res = await deleteImage(fileKey);
-      console.log(res);
+      await deleteImage(fileKey);
     }
     newPhotoUrl = null;
   }

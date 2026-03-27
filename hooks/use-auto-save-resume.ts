@@ -1,10 +1,10 @@
 "use client";
 
-import { Step } from "@/features/editor/contexts/editor-context";
 import { compileResume } from "@/features/editor/helpers/resume-helpers";
+import { Step } from "@/features/editor/types/editor-resume.type";
 import { saveResume } from "@/features/resume/actions/resume.actions";
 import { AppError } from "@/lib/errors";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import useSimpleDebounce from "./use-simple-debounce";
 import { useStateUpdater } from "./use-state-updater";
@@ -15,6 +15,7 @@ interface UseAutoSaveResumeProps {
   changeId: string | null;
   template: string;
   colorHex: string;
+  lastSaved?: Date | null;
 }
 
 export const useAutoSaveResume = ({
@@ -23,33 +24,55 @@ export const useAutoSaveResume = ({
   changeId,
   template,
   colorHex,
+  lastSaved: initialLastSaved,
 }: UseAutoSaveResumeProps) => {
   const debouncedChangeId = useSimpleDebounce(changeId, { delay: 500 });
   const [state, setState] = useState({
     error: null as AppError | null,
-    lastSaved: null as Date | null,
+    lastSaved: initialLastSaved,
     lastSavedChangeId: null as string | null,
     hasUnsavedChanges: false,
     isSaving: false,
     currentResumeId: resumeId,
   });
 
-  const latestChangeRef = useRef<null | string>(null);
   const isMountedRef = useRef(true);
 
   const updateState = useStateUpdater(setState);
 
-  const save = useCallback(async () => {
+  useEffect(() => {
+    if (!initialLastSaved) return;
+    updateState({ lastSaved: initialLastSaved });
+  }, [initialLastSaved]);
+
+  useEffect(() => {
+    if (!debouncedChangeId || debouncedChangeId === state.lastSavedChangeId)
+      return;
+    updateState({ error: null, hasUnsavedChanges: true });
+  }, [debouncedChangeId, state.lastSavedChangeId]);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  const save = async () => {
+    if (!state.hasUnsavedChanges || state.isSaving) return;
+    const changeIdToSave = debouncedChangeId;
     try {
       updateState({ error: null, isSaving: true });
-      const resumeData = compileResume(steps);
-      resumeData.template = template;
-      resumeData.colorHex = colorHex;
-      state.currentResumeId && (resumeData.id = state.currentResumeId);
+      const resumeData = compileResume({
+        id: state.currentResumeId ?? undefined,
+        steps,
+        template,
+        colorHex,
+      });
       const updatedResume = await saveResume(resumeData);
       if (isMountedRef.current)
         updateState({
-          lastSavedChangeId: debouncedChangeId,
+          lastSavedChangeId: changeIdToSave,
           currentResumeId: updatedResume.id,
           lastSaved: new Date(),
         });
@@ -72,55 +95,19 @@ export const useAutoSaveResume = ({
       });
     } finally {
       if (isMountedRef.current) {
-        updateState((prev) => ({
+        updateState({
           isSaving: false,
-          hasUnsavedChanges: !!(
-            latestChangeRef.current &&
-            latestChangeRef.current !== prev.lastSavedChangeId
-          ),
-        }));
+          hasUnsavedChanges: changeIdToSave !== debouncedChangeId,
+        });
       }
     }
-  }, [debouncedChangeId, steps, template, colorHex, state.currentResumeId]);
+  };
 
   useEffect(() => {
-    updateState({ error: null });
-    latestChangeRef.current = debouncedChangeId;
-  }, [debouncedChangeId]);
+    if (!state.hasUnsavedChanges || state.isSaving) return;
 
-  useEffect(() => {
-    isMountedRef.current = true;
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (
-      state.isSaving ||
-      state.error ||
-      !debouncedChangeId ||
-      debouncedChangeId == state.lastSavedChangeId
-    )
-      return;
-    if (state.hasUnsavedChanges) {
-      updateState({ hasUnsavedChanges: false });
-      return;
-    }
-
-    // toast.promise(save(), {
-    //   loading: "Saving changes...",
-    //   success: "Changes saved",
-    //   error: {
-    //     message: "Could not save changes",
-    //     action: {
-    //       label: "Retry",
-    //       onClick: save,
-    //     },
-    //   },
-    // });
     save();
-  }, [debouncedChangeId, state.hasUnsavedChanges]);
+  }, [state.hasUnsavedChanges, save, state.isSaving]);
 
   return { ...state, save };
 };

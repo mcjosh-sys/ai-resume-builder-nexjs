@@ -2,7 +2,7 @@
 
 import { AppError } from "@/lib/errors";
 import { auth } from "@clerk/nextjs/server";
-import { utapi } from "./uploadthing";
+import { utapi } from "../uploadthing";
 
 export async function getUserId() {
   const { userId } = await auth();

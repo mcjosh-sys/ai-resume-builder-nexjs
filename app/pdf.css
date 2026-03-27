@@ -1,0 +1,4 @@
+@import "tailwindcss";
+
+@source "../features/editor/components/resume-template-renderer.tsx";
+@source "../features/editor/components/templates/**/*.{ts,tsx}";

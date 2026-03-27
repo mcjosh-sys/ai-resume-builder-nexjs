@@ -32,7 +32,8 @@ import { isEqual } from "lodash";
 import { GripHorizontal, Star, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useFieldArray, useForm, UseFormReturn } from "react-hook-form";
-import { FormCompProps, useEditorContext } from "../../contexts/editor-context";
+import { useEditorContext } from "../../contexts/editor-context";
+import { FormCompProps } from "../../types/editor-resume.type";
 
 const LEVEL_MAP: Record<number, string> = {
   1: "BEGINNER",

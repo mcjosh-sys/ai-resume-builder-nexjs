@@ -14,7 +14,8 @@ import { headerSchema, HeaderValues } from "@/lib/validation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { FormCompProps, useEditorContext } from "../../contexts/editor-context";
+import { useEditorContext } from "../../contexts/editor-context";
+import { FormCompProps } from "../../types/editor-resume.type";
 
 function _HeaderForm({ data, onChange }: FormCompProps<"header">) {
   const form = useForm<HeaderValues>({
@@ -27,7 +28,7 @@ function _HeaderForm({ data, onChange }: FormCompProps<"header">) {
       country: data.country ?? "",
       phone: data.phone ?? "",
       email: data.email ?? "",
-      photo: data.photo,
+      photo: undefined,
     },
   });
 
@@ -83,7 +84,7 @@ function _HeaderForm({ data, onChange }: FormCompProps<"header">) {
                   <FormLabel className="sr-only">Photo</FormLabel>
                   <FormControl>
                     <ProfilePhotoSelector
-                      value={field.value ?? (data.photoUrl || null)}
+                      value={field.value ?? data.photoUrl}
                       onChange={field.onChange}
                     />
                   </FormControl>

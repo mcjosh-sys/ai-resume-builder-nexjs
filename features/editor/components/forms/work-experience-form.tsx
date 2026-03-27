@@ -34,7 +34,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { GripHorizontal } from "lucide-react";
 import { useEffect } from "react";
 import { useFieldArray, useForm, UseFormReturn } from "react-hook-form";
-import { FormCompProps, useEditorContext } from "../../contexts/editor-context";
+import { useEditorContext } from "../../contexts/editor-context";
+import { FormCompProps } from "../../types/editor-resume.type";
 
 const _WorkExperienceForm = ({
   data,

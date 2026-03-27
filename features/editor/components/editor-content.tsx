@@ -1,3 +1,5 @@
+"use client";
+
 import { Clock, Loader2 } from "lucide-react";
 import { useEditorContext } from "../contexts/editor-context";
 import { EditorBottomNav } from "./editor-bottom-nav";

@@ -34,7 +34,8 @@ import { isEqual } from "lodash";
 import { GripHorizontal } from "lucide-react";
 import { useEffect } from "react";
 import { useFieldArray, useForm, UseFormReturn } from "react-hook-form";
-import { FormCompProps, useEditorContext } from "../../contexts/editor-context";
+import { useEditorContext } from "../../contexts/editor-context";
+import { FormCompProps } from "../../types/editor-resume.type";
 
 function _AwardsForm({ data, onChange }: FormCompProps<"awards">) {
   const form = useForm<AwardValues>({

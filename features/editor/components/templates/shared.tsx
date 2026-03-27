@@ -1,7 +1,5 @@
-"use client";
-
 import { cn } from "@/lib/utils";
-import type { ResumeTemplate } from "../template-selector";
+import { ResumeTemplate } from "../../resource/templates";
 
 // ---------- Data Types ----------
 
@@ -82,7 +80,7 @@ export type ResumeSection =
   | { id: "awards" }
   | { id: string; title: string }; // other-field or custom sections (not rendered yet)
 
-export type ResumeData = {
+export type TemplateResume = {
   // From header step
   photoUrl?: string;
   firstName?: string;
@@ -112,7 +110,7 @@ export type ResumeData = {
 
 export type ResumeTemplateRendererProps = {
   template: ResumeTemplate;
-  data: ResumeData;
+  data: TemplateResume;
 };
 
 // ---------- Shared utilities ----------
@@ -156,16 +154,35 @@ export function RichText({
   const isHtml = /<[a-z][\s\S]*>/i.test(html);
   if (isHtml) {
     return (
-      <div
-        className={cn(
-          "prose-resume text-xs leading-relaxed [&_ul]:list-disc [&_ul]:pl-4 [&_li]:mb-0.5",
-          className,
-        )}
-        dangerouslySetInnerHTML={{ __html: html }}
-      />
+      <>
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
+          .richtext-content ul {
+            list-style-type: disc;
+            padding-left: 1.5rem;
+          }
+          .richtext-content ol {
+            list-style-type: decimal;
+            padding-left: 1.5rem;
+          }
+        `,
+          }}
+        />
+        <div
+          className={cn("richtext-content text-sm", className)}
+          dangerouslySetInnerHTML={{
+            __html: html,
+          }}
+        />
+      </>
     );
   }
-  return <p className={cn("text-xs leading-relaxed", className)}>{html}</p>;
+  return (
+    <p className={cn("text-sm leading-relaxed whitespace-pre-line", className)}>
+      {html}
+    </p>
+  );
 }
 
 export function SectionTitle({
@@ -198,7 +215,7 @@ export function SectionTitle({
   );
 }
 
-export function ContactLine({ data }: { data: ResumeData }) {
+export function ContactLine({ data }: { data: TemplateResume }) {
   const parts = [
     location(data.city, data.country),
     data.email,

@@ -74,7 +74,7 @@ export const CreateResumeModal = ({ modal }: { modal: Modal }) => {
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     if (user) {
-      const resume = await createResume(data);
+      const resume = await createResume(user.id, data);
       navigate(`/editor?id=${resume.id}`);
       handleOpenChange(false);
     }

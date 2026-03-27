@@ -18,10 +18,19 @@ import {
 } from "@/components/ui/sidebar";
 import { useModal } from "@/hooks/use-modal";
 import { cn } from "@/lib/utils";
-import { Eye, EyeOff, GripVertical, Lock, Plus, Sparkles, Trash2 } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  GripVertical,
+  Lock,
+  Plus,
+  Sparkles,
+  Trash2,
+} from "lucide-react";
 import { useMemo, useState } from "react";
-import { Step, useEditorContext } from "../contexts/editor-context";
-import { FIXED_STEP_IDS } from "../providers/editor-provider";
+import { useEditorContext } from "../contexts/editor-context";
+import { FIXED_STEP_IDS } from "../resource/steps";
+import { Step } from "../types/editor-resume.type";
 import { AddSectionModal } from "./add-section-modal";
 
 export function EditorSidebar() {

@@ -16,7 +16,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { isEqual } from "lodash";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { OtherFieldStep, useEditorContext } from "../../contexts/editor-context";
+import { useEditorContext } from "../../contexts/editor-context";
+import { OtherFieldStep } from "../../types/editor-resume.type";
 
 interface CustomSectionFormProps {
   step: OtherFieldStep;

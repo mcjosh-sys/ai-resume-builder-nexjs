@@ -1,12 +1,12 @@
 "use client";
 
-import { AddStepInput, Step } from "@/features/editor/contexts/editor-context";
 import { parseResume } from "@/features/editor/helpers/resume-helpers";
-import { DEFAULT_STEPS } from "@/features/editor/providers/editor-provider";
+import { DEFAULT_STEPS } from "@/features/editor/resource/steps";
+import { AddStepInput, Step } from "@/features/editor/types/editor-resume.type";
 import { getResume } from "@/features/resume/actions/resume.actions";
 import { AppError } from "@/lib/errors";
 import { createId } from "@paralleldrive/cuid2";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useAutoSaveResume } from "./use-auto-save-resume";
 import useUnloadWarning from "./use-unload-warning";
 
@@ -18,6 +18,7 @@ export const useResume = ({
   defaultSteps?: Step[];
 } = {}) => {
   const [state, setState] = useState({
+    updatedAt: null as Date | null,
     isLoading: false,
     error: null as AppError | null,
     loaded: false,
@@ -25,17 +26,30 @@ export const useResume = ({
     template: "aurora",
     colorHex: "default",
     changeId: null as string | null,
+    currentResumeId: resumeId,
   });
   const isFreshResumeRef = useRef(true);
 
-  const { currentResumeId, hasUnsavedChanges, isSaving, error, lastSaved } =
-    useAutoSaveResume({
-      resumeId,
-      steps: state.steps,
-      changeId: state.changeId,
-      template: state.template,
-      colorHex: state.colorHex,
-    });
+  const {
+    currentResumeId: savedResumeId,
+    hasUnsavedChanges,
+    isSaving,
+    error,
+    lastSaved,
+    save,
+  } = useAutoSaveResume({
+    resumeId,
+    steps: state.steps,
+    changeId: state.changeId,
+    template: state.template,
+    colorHex: state.colorHex,
+    lastSaved: state.updatedAt,
+  });
+
+  useEffect(() => {
+    if (error || state.error || savedResumeId === state.currentResumeId) return;
+    setState((prev) => ({ ...prev, currentResumeId: savedResumeId }));
+  }, [savedResumeId, state.currentResumeId, error, state.error]);
 
   const isMountedRef = useRef(true);
   useUnloadWarning(hasUnsavedChanges || isSaving);
@@ -61,7 +75,7 @@ export const useResume = ({
         ...prev,
         isLoading: true,
         error: null,
-        resume: null,
+        updatedAt: null,
         steps: defaultSteps,
       }));
 
@@ -78,10 +92,10 @@ export const useResume = ({
 
         setState((prev) => ({
           ...prev,
-          resume: rawResume,
+          updatedAt: rawResume?.updatedAt,
           steps: parsedResume.steps,
-          template: rawResume.template ?? "aurora",
-          colorHex: rawResume.colorHex ?? "default",
+          template: parsedResume.template,
+          colorHex: parsedResume.colorHex,
           changeId: null,
         }));
         // isFreshResumeRef.current = false;
@@ -92,7 +106,7 @@ export const useResume = ({
             err instanceof AppError
               ? err
               : new AppError("Something went wrong", { status: 500 });
-          setState((prev) => ({ ...prev, error }));
+          setState((prev) => ({ ...prev, error, currentResumeId: null }));
         }
       } finally {
         if (isMountedRef.current) {
@@ -125,58 +139,69 @@ export const useResume = ({
     }));
   };
 
-  const addSection = (input: AddStepInput) => {
-    const id = createId();
-    const newSection: Step = {
-      id: `other-field-${id}`,
-      title: input.title,
-      icon: input.icon,
-      sidebarDesc: input.sidebarDesc,
-      desc: input.desc,
-      enabled: true,
-      data: {},
-    };
+  const addSection = useCallback(
+    (input: AddStepInput) => {
+      const id = createId();
+      const newSection: Step = {
+        id: `other-field-${id}`,
+        title: input.title,
+        icon: input.icon,
+        sidebarDesc: input.sidebarDesc,
+        desc: input.desc,
+        enabled: true,
+        data: {},
+      };
 
-    setState((prev) => ({
-      ...prev,
-      steps: [...prev.steps, newSection],
-      changeId: createId(),
-    }));
+      setState((prev) => ({
+        ...prev,
+        steps: [...prev.steps, newSection],
+        changeId: createId(),
+      }));
 
-    return newSection;
-  };
+      return newSection;
+    },
+    [setState],
+  );
 
-  const removeSection = (stepId: string) => {
-    if (!stepId.startsWith("other-field-")) return;
-    setState((prev) => ({
-      ...prev,
-      steps: prev.steps.filter((s) => s.id !== stepId),
-      changeId: createId(),
-    }));
-  };
+  const removeSection = useCallback(
+    (stepId: string) => {
+      if (!stepId.startsWith("other-field-")) return;
+      setState((prev) => ({
+        ...prev,
+        steps: prev.steps.filter((s) => s.id !== stepId),
+        changeId: createId(),
+      }));
+    },
+    [setState],
+  );
 
-  const setTemplate = (template: string) => {
-    setState((prev) => ({
-      ...prev,
-      template,
-      changeId: createId(),
-    }));
-  };
+  const setTemplate = useCallback(
+    (template: string) => {
+      setState((prev) => ({
+        ...prev,
+        template,
+        changeId: createId(),
+      }));
+    },
+    [setState],
+  );
 
-  const setColorHex = (colorHex: string) => {
-    setState((prev) => ({
-      ...prev,
-      colorHex,
-      changeId: createId(),
-    }));
-  };
+  const setColorHex = useCallback(
+    (colorHex: string) => {
+      setState((prev) => ({
+        ...prev,
+        colorHex,
+        changeId: createId(),
+      }));
+    },
+    [setState],
+  );
 
   return {
     ...state,
     error: state.error || error,
     lastSaved,
     hasUnsavedChanges,
-    currentResumeId,
     isSaving,
     setSteps,
     updateSection,
@@ -184,5 +209,6 @@ export const useResume = ({
     removeSection,
     setTemplate,
     setColorHex,
+    save,
   };
 };

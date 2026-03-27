@@ -9,7 +9,7 @@ import {
   FaUser,
 } from "react-icons/fa6";
 import { MdContacts } from "react-icons/md";
-import { Step } from "../contexts/editor-context";
+import { Step } from "../types/editor-resume.type";
 
 const ICON_IDS = [
   "briefcase",

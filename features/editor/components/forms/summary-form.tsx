@@ -11,7 +11,8 @@ import { summarySchema, SummaryValues } from "@/lib/validation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { FormCompProps, useEditorContext } from "../../contexts/editor-context";
+import { useEditorContext } from "../../contexts/editor-context";
+import { FormCompProps } from "../../types/editor-resume.type";
 
 function _SummaryForm({ data, onChange }: FormCompProps<"summary">) {
   const form = useForm<SummaryValues>({

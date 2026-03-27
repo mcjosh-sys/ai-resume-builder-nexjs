@@ -1,0 +1,27 @@
+components/download-pdf-button.tsx(3,18): error TS2305: Module '"@/components/ui/button"' has no exported member 'ButtonProps'.
+features/editor/components/add-section-modal.tsx(17,10): error TS2459: Module '"../contexts/editor-context"' declares 'Step' locally, but it is not exported.
+features/editor/components/editor-sidebar.tsx(23,10): error TS2459: Module '"../contexts/editor-context"' declares 'Step' locally, but it is not exported.
+features/editor/components/forms/awards-form.tsx(37,10): error TS2305: Module '"../../contexts/editor-context"' has no exported member 'FormCompProps'.
+features/editor/components/forms/certifications-form.tsx(36,10): error TS2305: Module '"../../contexts/editor-context"' has no exported member 'FormCompProps'.
+features/editor/components/forms/custom-section-form.tsx(19,10): error TS2305: Module '"../../contexts/editor-context"' has no exported member 'OtherFieldStep'.
+features/editor/components/forms/education-form.tsx(36,10): error TS2305: Module '"../../contexts/editor-context"' has no exported member 'FormCompProps'.
+features/editor/components/forms/header-form.tsx(17,10): error TS2305: Module '"../../contexts/editor-context"' has no exported member 'FormCompProps'.
+features/editor/components/forms/projects-form.tsx(37,10): error TS2305: Module '"../../contexts/editor-context"' has no exported member 'FormCompProps'.
+features/editor/components/forms/skills-form.tsx(35,10): error TS2305: Module '"../../contexts/editor-context"' has no exported member 'FormCompProps'.
+features/editor/components/forms/summary-form.tsx(14,10): error TS2305: Module '"../../contexts/editor-context"' has no exported member 'FormCompProps'.
+features/editor/components/forms/work-experience-form.tsx(37,10): error TS2305: Module '"../../contexts/editor-context"' has no exported member 'FormCompProps'.
+features/editor/components/resume-preview.tsx(4,15): error TS2459: Module '"../contexts/editor-context"' declares 'Step' locally, but it is not exported.
+features/editor/helpers/resume-helpers.ts(6,10): error TS2459: Module '"../contexts/editor-context"' declares 'Step' locally, but it is not exported.
+features/editor/helpers/resume-helpers.ts(143,14): error TS2339: Property 'enabled' does not exist on type 'never'.
+features/editor/helpers/resume-helpers.ts(144,32): error TS2339: Property 'title' does not exist on type 'never'.
+features/editor/helpers/resume-helpers.ts(146,17): error TS2339: Property 'sidebarDesc' does not exist on type 'never'.
+features/editor/helpers/resume-helpers.ts(147,38): error TS2339: Property 'desc' does not exist on type 'never'.
+features/editor/helpers/resume-helpers.ts(148,31): error TS2339: Property 'icon' does not exist on type 'never'.
+features/editor/hooks/use-stepper.ts(5,10): error TS2459: Module '"../contexts/editor-context"' declares 'Step' locally, but it is not exported.
+features/editor/providers/editor-provider.tsx(9,10): error TS2459: Module '"../contexts/editor-context"' declares 'AddStepInput' locally, but it is not exported.
+features/editor/providers/editor-provider.tsx(9,39): error TS2459: Module '"../contexts/editor-context"' declares 'Step' locally, but it is not exported.
+features/editor/resource/icons.ts(12,10): error TS2459: Module '"../contexts/editor-context"' declares 'Step' locally, but it is not exported.
+features/resume/components/modals/create-resume-modal.tsx(77,28): error TS2554: Expected 2 arguments, but got 1.
+hooks/use-auto-save-resume.ts(3,10): error TS2459: Module '"@/features/editor/contexts/editor-context"' declares 'Step' locally, but it is not exported.
+hooks/use-resume.ts(3,10): error TS2459: Module '"@/features/editor/contexts/editor-context"' declares 'AddStepInput' locally, but it is not exported.
+hooks/use-resume.ts(3,24): error TS2459: Module '"@/features/editor/contexts/editor-context"' declares 'Step' locally, but it is not exported.
