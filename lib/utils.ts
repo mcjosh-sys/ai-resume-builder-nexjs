@@ -95,21 +95,40 @@ export function sanitizeAndParseJson<T = unknown>(raw: string): T {
     // محاولة تنظيف الرد
     let cleaned = raw.trim();
 
-    // Remove ```json ... ``` or ``` ... ```
-    if (cleaned.startsWith("```")) {
-      cleaned = cleaned
-        .replace(/^```[a-zA-Z]*\n?/, "") // remove opening ```json
-        .replace(/```$/, ""); // remove closing ```
+    // 1. Try to extract from a markdown code block first
+    const codeBlockMatch = cleaned.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+    if (codeBlockMatch) {
+      cleaned = codeBlockMatch[1].trim();
+      try {
+        return JSON.parse(cleaned);
+      } catch {
+        // Fallthrough if it still fails
+      }
     }
 
-    // Remove stray backticks anywhere
+    // 2. Remove any remaining stray backticks
     cleaned = cleaned.replace(/```/g, "");
 
-    // Optional: extract JSON if wrapped with text
-    const firstBrace = cleaned.indexOf("{");
-    const lastBrace = cleaned.lastIndexOf("}");
+    // 3. Try to find the JSON object or array by matching the first and last brackets
+    const firstCurly = cleaned.indexOf("{");
+    const firstSquare = cleaned.indexOf("[");
 
-    if (firstBrace !== -1 && lastBrace !== -1) {
+    let firstBrace = -1;
+    let lastBrace = -1;
+
+    // Use whichever bracket appears first
+    if (
+      (firstCurly !== -1 && firstSquare !== -1 && firstCurly < firstSquare) ||
+      (firstCurly !== -1 && firstSquare === -1)
+    ) {
+      firstBrace = firstCurly;
+      lastBrace = cleaned.lastIndexOf("}");
+    } else if (firstSquare !== -1) {
+      firstBrace = firstSquare;
+      lastBrace = cleaned.lastIndexOf("]");
+    }
+
+    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
       cleaned = cleaned.slice(firstBrace, lastBrace + 1);
     }
 

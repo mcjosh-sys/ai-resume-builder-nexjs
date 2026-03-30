@@ -1,3 +1,4 @@
+import { AIResume } from "@/features/ai/prompts";
 import { RawResume } from "@/features/resume/actions/resume.actions";
 import { $Enums, Prisma } from "@/lib/generated/prisma";
 import { parseDateInput } from "@/lib/utils";
@@ -423,4 +424,14 @@ export function stepsToTemplateResume(steps: Step[]): TemplateResume {
 export function parseResumeToTemplateResume(resume: RawResume): TemplateResume {
   const steps = parseResume(resume);
   return stepsToTemplateResume(steps.steps);
+}
+
+export function stepsToAIResume(steps: Step[]): AIResume {
+  return steps.map((step) => {
+    return {
+      id: step.id,
+      heading: step.title,
+      content: step.data,
+    };
+  });
 }

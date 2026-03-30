@@ -1,6 +1,6 @@
-import { PromptBuilder, PromptMessages } from ".";
+import { AIResume, PromptBuilder, PromptMessages } from ".";
 
-export function buildRewriteResumePrompt(resume: unknown): PromptMessages {
+export function buildRewriteResumePrompt(resume: AIResume): PromptMessages {
   const systemMessage = `
 You are an expert resume writer, ATS optimization specialist, and recruiter.
 

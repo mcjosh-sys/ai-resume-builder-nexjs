@@ -5,30 +5,24 @@ import { Step } from "@/features/editor/types/editor-resume.type";
 import { AppError } from "@/lib/errors";
 import { sanitizeAndParseJson } from "@/lib/utils";
 import { AIResume } from "../prompts";
-import { buildRewriteResumePrompt } from "../prompts/rewrite.prompt";
+import { buildSuggestionPrompt } from "../prompts/suggestion.prompt";
 import { getMultiProvider } from "../providers/factory";
 
-export async function rewriteResume(steps: Step[]) {
+export async function getAISuggestions(steps: Step[], jobDescription: string) {
   const provider = getMultiProvider();
-  const prompt = buildRewriteResumePrompt(
+  const prompt = buildSuggestionPrompt(
+    jobDescription,
     stepsToAIResume(steps.filter((s) => s.enabled)),
   );
-  const response = await provider.generate(prompt, "rewrite");
+  const response = await provider.generate(prompt, "suggestion");
 
   try {
     const parsed = sanitizeAndParseJson<AIResume>(response);
-    return merge(steps, parsed);
+    return parsed;
   } catch (error) {
     throw new AppError("Failed to parse AI response", {
       code: "AI_RESPONSE_PARSE_ERROR",
       cause: error,
     });
   }
-}
-
-function merge(steps: Step[], data: AIResume) {
-  return steps.map((step) => ({
-    ...step,
-    data: data.find((s) => s.id === step.id)?.content ?? step.data,
-  }));
 }

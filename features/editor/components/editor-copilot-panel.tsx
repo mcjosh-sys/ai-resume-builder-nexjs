@@ -25,13 +25,14 @@ export function EditorCopilotPanel({
   const [activeTab, setActiveTab] = useState<"actions" | "suggestions">(
     "actions",
   );
+  const [jobDescription, setJobDescription] = useState("");
 
   const {
     stepper: { steps },
     editorState: { selectedTemplate, colorHex },
   } = useEditorContext();
 
-  const { status, error, rewrite } = useResumeAI({
+  const { status, error, rewrite, getSuggestions } = useResumeAI({
     steps,
     template: selectedTemplate,
     colorHex,
@@ -126,10 +127,16 @@ export function EditorCopilotPanel({
             <CardContent className="space-y-4 pt-4">
               <Textarea
                 rows={4}
+                value={jobDescription}
+                onChange={(e) => setJobDescription(e.target.value)}
                 placeholder="Paste the job description here to get AI-powered suggestions..."
                 className="resize-none"
               />
-              <Button className="w-full bg-linear-to-r from-violet-600 to-blue-600">
+              <Button
+                className="w-full bg-linear-to-r from-violet-600 to-blue-600"
+                onClick={() => getSuggestions(jobDescription)}
+                disabled={status === "suggesting" || !jobDescription}
+              >
                 <Sparkles />
                 Analyze & Optimize
               </Button>

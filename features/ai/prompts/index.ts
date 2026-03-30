@@ -1,3 +1,11 @@
+export type AIResumeSection = {
+  id: string;
+  heading: string;
+  content: any;
+};
+
+export type AIResume = AIResumeSection[];
+
 export type Prompt = {
   role: "system" | "user" | "assistant";
   content: string;
