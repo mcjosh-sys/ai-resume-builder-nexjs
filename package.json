@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "shadcn:add": "bunx shadcn@latest add",
-    "build:pdf:css": "bunx tailwindcss -i ./app/pdf.css -o ./public/css/pdf.css --minify"
+    "build:pdf:css": "bunx tailwindcss -i ./app/pdf.css -o ./public/css/pdf.css --minify",
+    "postinstall": "bunx prisma generate"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.36.5",
