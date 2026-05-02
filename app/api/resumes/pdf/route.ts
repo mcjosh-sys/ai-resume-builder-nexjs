@@ -1,53 +1,32 @@
 // app/api/pdf/route.ts
 import chromium from "@sparticuz/chromium-min";
-import fs from "fs";
 import { NextResponse } from "next/server";
-import path from "path";
 import puppeteer from "puppeteer-core";
 
 export const runtime = "nodejs";
-
-async function getChromiumPath() {
-  // 1. Try default (works locally / some envs)
-  const defaultPath = await chromium.executablePath();
-  if (defaultPath && fs.existsSync(defaultPath)) {
-    return defaultPath;
-  }
-
-  // 2. Fallback: search inside .next/node_modules
-  const baseDir = path.join(process.cwd(), ".next", "node_modules");
-
-  if (fs.existsSync(baseDir)) {
-    const dirs = fs.readdirSync(baseDir);
-
-    const chromiumDir = dirs.find((d) => d.startsWith("@sparticuz/chromium"));
-
-    if (chromiumDir) {
-      const binPath = path.join(baseDir, chromiumDir, "bin", "chromium");
-
-      if (fs.existsSync(binPath)) {
-        return binPath;
-      }
-    }
-  }
-
-  throw new Error("Chromium binary not found");
-}
 
 export async function getExecutablePath() {
   const isLocal = process.env.NODE_ENV === "development";
   if (isLocal) {
     return "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
   }
-  return await chromium.executablePath();
+  return await chromium.executablePath(
+    `https://github.com/Sparticuz/chromium/releases/download/v148.0.0/chromium-v148.0.0-pack.x64.tar`,
+  );
 }
 
 export async function getBrowser() {
   return puppeteer.launch({
-    args: [...chromium.args, "--hide-scrollbars", "--disable-web-security"],
-    executablePath: await chromium.executablePath(
-      `https://github.com/Sparticuz/chromium/releases/download/v148.0.0/chromium-v148.0.0-pack.x64.tar`,
-    ),
+    args: [
+      ...chromium.args,
+      "--hide-scrollbars",
+      "--disable-web-security",
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-gpu",
+    ],
+    executablePath: await getExecutablePath(),
     headless: true,
   });
 }
