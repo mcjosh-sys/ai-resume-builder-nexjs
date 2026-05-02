@@ -1,5 +1,5 @@
 // app/api/pdf/route.ts
-import chromium from "@sparticuz/chromium";
+import chromium from "@sparticuz/chromium-min";
 import fs from "fs";
 import { NextResponse } from "next/server";
 import path from "path";
@@ -42,20 +42,31 @@ export async function getExecutablePath() {
   return await chromium.executablePath();
 }
 
+export async function getBrowser() {
+  return puppeteer.launch({
+    args: [...chromium.args, "--hide-scrollbars", "--disable-web-security"],
+    executablePath: await chromium.executablePath(
+      `https://github.com/Sparticuz/chromium/releases/download/v148.0.0/chromium-v148.0.0-pack.x64.tar`,
+    ),
+    headless: true,
+  });
+}
+
 export async function POST(req: Request) {
   const { html } = await req.json();
 
-  const browser = await puppeteer.launch({
-    args: [
-      ...chromium.args,
-      "--no-sandbox",
-      "--disable-setuid-sandbox",
-      "--disable-dev-shm-usage", // Uses /tmp instead of memory for shared memory
-      "--disable-gpu",
-    ],
-    executablePath: await getExecutablePath(),
-    headless: true,
-  });
+  // const browser = await puppeteer.launch({
+  //   args: [
+  //     ...chromium.args,
+  //     "--no-sandbox",
+  //     "--disable-setuid-sandbox",
+  //     "--disable-dev-shm-usage", // Uses /tmp instead of memory for shared memory
+  //     "--disable-gpu",
+  //   ],
+  //   executablePath: await getExecutablePath(),
+  //   headless: true,
+  // });
+  const browser = await getBrowser();
 
   try {
     const t = Date.now();

@@ -6,10 +6,8 @@ import { parseResumeToTemplateResume } from "@/features/editor/helpers/resume-he
 import { getTemplateById } from "@/features/editor/resource/templates";
 import { getResume } from "@/features/resume/actions/resume.actions";
 import { renderReactToHtml } from "@/lib/pdf";
-import chromium from "@sparticuz/chromium";
 import { NextResponse } from "next/server";
-import puppeteer from "puppeteer-core";
-import { getExecutablePath } from "../../pdf/route";
+import { getBrowser } from "../../pdf/route";
 
 export const runtime = "nodejs";
 
@@ -44,17 +42,7 @@ export async function GET(
   const html = renderReactToHtml(css, content);
 
   const t = Date.now();
-  const browser = await puppeteer.launch({
-    args: [
-      ...chromium.args,
-      "--no-sandbox",
-      "--disable-setuid-sandbox",
-      "--disable-dev-shm-usage", // Uses /tmp instead of memory for shared memory
-      "--disable-gpu",
-    ],
-    executablePath: await getExecutablePath(),
-    headless: true,
-  });
+  const browser = await getBrowser();
 
   try {
     const page = await browser.newPage();
