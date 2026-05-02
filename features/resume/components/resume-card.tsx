@@ -16,12 +16,12 @@ import {
 import { useFromNow } from "@/hooks/use-from-now";
 import { useNavigate } from "@/hooks/use-navigate";
 import { cn, downalodObject } from "@/lib/utils";
-import { Loader2, MoreHorizontal, Pencil, Trash2, Type } from "lucide-react";
+import { Copy, Loader2, MoreHorizontal, Pencil, Trash2, Type } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FaFilePdf, FaUser } from "react-icons/fa6";
 import { toast } from "sonner";
-import { deleteResume } from "../actions/resume.actions";
+import { cloneResume, deleteResume } from "../actions/resume.actions";
 import { RenameResumeModal } from "./modals/rename-resume-modal";
 
 export type ResumeCardData = {
@@ -74,6 +74,7 @@ export function ResumeCard({
   const router = useRouter();
   const lastEdited = useFromNow(resume.updatedAt);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isCloning, setIsCloning] = useState(false);
   const [isRenameOpen, setIsRenameOpen] = useState(false);
   const [resumeTitle, setResumeTitle] = useState(
     resume.title || "Untitled Resume",
@@ -103,6 +104,22 @@ export function ResumeCard({
 
   const handleEdit = () => {
     navigate(`/editor?id=${resume.id}`);
+  };
+
+  const handleClone = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isCloning) return;
+    setIsCloning(true);
+    try {
+      const cloned = await cloneResume(resume.id);
+      router.refresh();
+      navigate(`/editor?id=${cloned.id}`);
+      toast.success("Resume cloned successfully.");
+    } catch {
+      toast.error("Failed to clone resume. Please try again.");
+    } finally {
+      setIsCloning(false);
+    }
   };
 
   const handleDelete = async (e: React.MouseEvent) => {
@@ -195,6 +212,10 @@ export function ResumeCard({
                   <Type className="mr-2 size-3.5" />
                   Rename
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleClone} disabled={isCloning}>
+                  <Copy className="mr-2 size-3.5" />
+                  {isCloning ? "Cloning…" : "Clone"}
+                </DropdownMenuItem>
                 <DownloadPdfMenuItem
                   resumeId={resume.id}
                   onStatusChange={updateDownloadingStatus}
@@ -260,6 +281,7 @@ export function ResumeListItem({
   const router = useRouter();
   const lastEdited = useFromNow(resume.updatedAt);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isCloning, setIsCloning] = useState(false);
   const [isRenameOpen, setIsRenameOpen] = useState(false);
   const [resumeTitle, setResumeTitle] = useState(
     resume.title || "Untitled Resume",
@@ -287,6 +309,22 @@ export function ResumeListItem({
     .join(" ");
 
   const handleEdit = () => navigate(`/editor?id=${resume.id}`);
+
+  const handleClone = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isCloning) return;
+    setIsCloning(true);
+    try {
+      const cloned = await cloneResume(resume.id);
+      router.refresh();
+      navigate(`/editor?id=${cloned.id}`);
+      toast.success("Resume cloned successfully.");
+    } catch {
+      toast.error("Failed to clone resume. Please try again.");
+    } finally {
+      setIsCloning(false);
+    }
+  };
 
   const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -381,6 +419,10 @@ export function ResumeListItem({
             >
               <Type className="mr-2 size-3.5" />
               Rename
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleClone} disabled={isCloning}>
+              <Copy className="mr-2 size-3.5" />
+              {isCloning ? "Cloning…" : "Clone"}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={(e) => e.stopPropagation()} asChild>
               <DownloadPdfMenuItem

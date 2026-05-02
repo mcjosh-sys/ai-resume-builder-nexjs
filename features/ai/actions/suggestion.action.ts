@@ -3,21 +3,29 @@
 import { stepsToAIResume } from "@/features/editor/helpers/resume-helpers";
 import { Step } from "@/features/editor/types/editor-resume.type";
 import { AppError } from "@/lib/errors";
-import { sanitizeAndParseJson } from "@/lib/utils";
-import { AIResume } from "../prompts";
-import { buildSuggestionPrompt } from "../prompts/suggestion.prompt";
+import { parseAIJSON } from "@/lib/utils";
+import {
+  AISuggestion,
+  buildSuggestionPrompt,
+} from "../prompts/suggestion.prompt";
 import { getMultiProvider } from "../providers/factory";
 
 export async function getAISuggestions(steps: Step[], jobDescription: string) {
   const provider = getMultiProvider();
   const prompt = buildSuggestionPrompt(
     jobDescription,
-    stepsToAIResume(steps.filter((s) => s.enabled)),
+    stepsToAIResume(
+      steps.filter(
+        (s) =>
+          s.enabled &&
+          ["summary", "experience", "projects", "skills"].includes(s.id),
+      ),
+    ),
   );
   const response = await provider.generate(prompt, "suggestion");
 
   try {
-    const parsed = sanitizeAndParseJson<AIResume>(response);
+    const parsed = parseAIJSON<AISuggestion[]>(response);
     return parsed;
   } catch (error) {
     throw new AppError("Failed to parse AI response", {

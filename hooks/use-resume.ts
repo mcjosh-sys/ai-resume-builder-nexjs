@@ -10,6 +10,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useAutoSaveResume } from "./use-auto-save-resume";
 import useUnloadWarning from "./use-unload-warning";
 
+export type ResumeMetadata = {
+  jobDescription: string;
+  atsScore: number | null;
+  colorHex: string;
+  template: string;
+};
+
 export const useResume = ({
   resumeId,
   defaultSteps = DEFAULT_STEPS,
@@ -23,8 +30,12 @@ export const useResume = ({
     error: null as AppError | null,
     loaded: false,
     steps: defaultSteps,
-    template: "aurora",
-    colorHex: "default",
+    metadata: {
+      jobDescription: "",
+      atsScore: null as number | null,
+      colorHex: "default",
+      template: "aurora",
+    },
     changeId: null as string | null,
     currentResumeId: resumeId,
   });
@@ -41,8 +52,10 @@ export const useResume = ({
     resumeId,
     steps: state.steps,
     changeId: state.changeId,
-    template: state.template,
-    colorHex: state.colorHex,
+    template: state.metadata.template,
+    colorHex: state.metadata.colorHex,
+    jobDescription: state.metadata.jobDescription,
+    atsScore: state.metadata.atsScore,
     lastSaved: state.updatedAt,
   });
 
@@ -94,8 +107,13 @@ export const useResume = ({
           ...prev,
           updatedAt: rawResume?.updatedAt,
           steps: parsedResume.steps,
-          template: parsedResume.template,
-          colorHex: parsedResume.colorHex,
+          metadata: {
+            ...prev.metadata,
+            template: parsedResume.metadata.template,
+            colorHex: parsedResume.metadata.colorHex,
+            jobDescription: parsedResume.metadata.jobDescription,
+            atsScore: parsedResume.metadata.atsScore,
+          },
           changeId: null,
         }));
         // isFreshResumeRef.current = false;
@@ -197,6 +215,17 @@ export const useResume = ({
     [setState],
   );
 
+  const updateResumeMetadata = useCallback(
+    (data: Partial<ResumeMetadata>) => {
+      setState((prev) => ({
+        ...prev,
+        metadata: { ...prev.metadata, ...data },
+        changeId: createId(),
+      }));
+    },
+    [setState],
+  );
+
   return {
     ...state,
     error: state.error || error,
@@ -210,5 +239,6 @@ export const useResume = ({
     setTemplate,
     setColorHex,
     save,
+    updateResumeMetadata,
   };
 };

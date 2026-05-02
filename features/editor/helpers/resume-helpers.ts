@@ -3,7 +3,6 @@ import { RawResume } from "@/features/resume/actions/resume.actions";
 import { $Enums, Prisma } from "@/lib/generated/prisma";
 import { parseDateInput } from "@/lib/utils";
 import { WithoutResume } from "@/types";
-import { createId } from "@paralleldrive/cuid2";
 import { TemplateResume } from "../components/resume-template-renderer";
 import { getIconById } from "../resource/icons";
 import { DEFAULT_STEPS } from "../resource/steps";
@@ -161,30 +160,12 @@ export function parseResume(resume: RawResume): EditorResume {
   return {
     id: resume.id,
     steps: Array.from(steps.values()),
-    template: resume.template ?? "aurora",
-    colorHex: resume.colorHex ?? "default",
-  };
-}
-
-function findStepAndAdd(steps: Step[], id: Step["id"]) {
-  const step = DEFAULT_STEPS.find((s) => s.id === id);
-  if (step) {
-    steps.push(step);
-  }
-}
-
-function addOtherStep(steps: Step[], section: Prisma.SectionCreateManyInput) {
-  steps.push(createOtherStep(section));
-}
-
-function createOtherStep(section: Prisma.SectionCreateManyInput): Step {
-  return {
-    id: `other-field-${section.id ?? createId()}`,
-    title: section.title,
-    icon: getIconById(section.icon),
-    sidebarDesc: section.sidebarDescription ?? "custom field",
-    desc: section.description ?? "custom field",
-    enabled: !!section.enabled,
+    metadata: {
+      template: resume.template ?? "aurora",
+      colorHex: resume.colorHex ?? "default",
+      jobDescription: resume.jobDescription ?? "",
+      atsScore: resume.atsScore ?? null,
+    },
   };
 }
 
@@ -303,8 +284,10 @@ export function compileResume(editorResume: EditorResume) {
   resumeData.id = editorResume.id;
   resumeData.sections = sectionData;
   resumeData.otherFields = otherFields;
-  resumeData.template = editorResume.template;
-  resumeData.colorHex = editorResume.colorHex;
+  resumeData.template = editorResume.metadata.template;
+  resumeData.colorHex = editorResume.metadata.colorHex;
+  resumeData.jobDescription = editorResume.metadata.jobDescription;
+  resumeData.atsScore = editorResume.metadata.atsScore;
 
   return resumeData;
 }

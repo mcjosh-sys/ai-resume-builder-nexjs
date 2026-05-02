@@ -147,6 +147,7 @@ export default function EditorProvider({ children }: BaseProps) {
           save: resume.save,
         },
         updateSection: resume.updateSection,
+        setSteps: resume.setSteps,
         stepper: {
           steps: resume.steps,
           ...stepper,
@@ -159,15 +160,17 @@ export default function EditorProvider({ children }: BaseProps) {
         editorState: {
           activeMobileMode,
           activeDesktopWorkspaceTab,
-          selectedTemplate: resume.template,
-          colorHex: resume.colorHex,
+          selectedTemplate: resume.metadata.template,
+          colorHex: resume.metadata.colorHex,
           mobileSectionsOpen,
           setActiveMobileMode,
           setActiveDesktopWorkspaceTab,
           setSelectedTemplate: resume.setTemplate,
           setColorHex: resume.setColorHex,
           setMobileSectionsOpen,
+          updateResumeMetadata: resume.updateResumeMetadata,
         },
+        resumeMetadata: resume.metadata,
       }}
     >
       {children}

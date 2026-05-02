@@ -88,50 +88,23 @@ export function downalodObject(filename: string, blob: Blob) {
   document.body.removeChild(a);
 }
 
-export function sanitizeAndParseJson<T = unknown>(raw: string): T {
-  try {
-    return JSON.parse(raw);
-  } catch {
-    // محاولة تنظيف الرد
-    let cleaned = raw.trim();
-
-    // 1. Try to extract from a markdown code block first
-    const codeBlockMatch = cleaned.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
-    if (codeBlockMatch) {
-      cleaned = codeBlockMatch[1].trim();
-      try {
-        return JSON.parse(cleaned);
-      } catch {
-        // Fallthrough if it still fails
-      }
-    }
-
-    // 2. Remove any remaining stray backticks
-    cleaned = cleaned.replace(/```/g, "");
-
-    // 3. Try to find the JSON object or array by matching the first and last brackets
-    const firstCurly = cleaned.indexOf("{");
-    const firstSquare = cleaned.indexOf("[");
-
-    let firstBrace = -1;
-    let lastBrace = -1;
-
-    // Use whichever bracket appears first
-    if (
-      (firstCurly !== -1 && firstSquare !== -1 && firstCurly < firstSquare) ||
-      (firstCurly !== -1 && firstSquare === -1)
-    ) {
-      firstBrace = firstCurly;
-      lastBrace = cleaned.lastIndexOf("}");
-    } else if (firstSquare !== -1) {
-      firstBrace = firstSquare;
-      lastBrace = cleaned.lastIndexOf("]");
-    }
-
-    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-      cleaned = cleaned.slice(firstBrace, lastBrace + 1);
-    }
-
-    return JSON.parse(cleaned);
-  }
+export function capitalizeFirst(s: string): string {
+  if (typeof s !== "string") return "";
+  const capitalized = s.replace(/^./, (match) => match.toUpperCase());
+  return capitalized;
 }
+
+export function capitalizeWords(s: string): string {
+  if (typeof s !== "string") return "";
+  return s.replace(/\b\w/g, (match) => match.toUpperCase());
+}
+
+export function normalizeString(s: string) {
+  return s
+    .toLowerCase()
+    .replace(/[^\w\s]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+export * from "./ai.util";

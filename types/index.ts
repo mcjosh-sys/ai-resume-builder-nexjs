@@ -1,3 +1,5 @@
+import { Step } from "@/features/editor/types/editor-resume.type";
+
 export type AnyObject = Record<string, any>;
 export type Prettify<T> = { [K in keyof T]: T[K] } & {};
 
@@ -14,5 +16,9 @@ export type Optional<T extends AnyObject> = {
 };
 
 export type WithoutResume<T> = Omit<T, "resumeId" | "resume">;
+
+export type ExtractStep<T extends Step["id"]> = Extract<Step, { id: T }>;
+
+export type ExtractStepData<T extends Step["id"]> = ExtractStep<T>["data"];
 
 export * from "./page.types";

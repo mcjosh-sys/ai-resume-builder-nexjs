@@ -33,7 +33,7 @@ export function VelvetTemplate({
   const accentClass = template.accent;
 
   return (
-    <div className="space-y-5 p-1">
+    <div className="space-y-5">
       {/* Elegant centered header */}
       <header className="text-center space-y-2">
         {fullName && (

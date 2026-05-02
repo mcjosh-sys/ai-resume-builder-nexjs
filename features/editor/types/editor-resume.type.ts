@@ -102,8 +102,12 @@ export type AddStepInput = {
 export type EditorResume = {
   id?: string;
   steps: Step[];
-  template: string;
-  colorHex: string;
+  metadata: {
+    template: string;
+    colorHex: string;
+    jobDescription: string;
+    atsScore: number | null;
+  };
 };
 
 export type HeaderSection = {

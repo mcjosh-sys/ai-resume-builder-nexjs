@@ -117,7 +117,7 @@ function _ProjectsForm({ data, onChange }: FormCompProps<"projects">) {
                   url: "",
                   startDate: "",
                   endDate: "",
-                  description: "",
+                  description: "<ul><li></li></ul>",
                 })
               }
             >

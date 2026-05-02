@@ -16,6 +16,8 @@ interface UseAutoSaveResumeProps {
   template: string;
   colorHex: string;
   lastSaved?: Date | null;
+  jobDescription: string;
+  atsScore: number | null;
 }
 
 export const useAutoSaveResume = ({
@@ -25,6 +27,8 @@ export const useAutoSaveResume = ({
   template,
   colorHex,
   lastSaved: initialLastSaved,
+  jobDescription,
+  atsScore,
 }: UseAutoSaveResumeProps) => {
   const debouncedChangeId = useSimpleDebounce(changeId, { delay: 500 });
   const [state, setState] = useState({
@@ -66,8 +70,12 @@ export const useAutoSaveResume = ({
       const resumeData = compileResume({
         id: state.currentResumeId ?? undefined,
         steps,
-        template,
-        colorHex,
+        metadata: {
+          template,
+          colorHex,
+          jobDescription,
+          atsScore,
+        },
       });
       const updatedResume = await saveResume(resumeData);
       if (isMountedRef.current)
@@ -92,22 +100,24 @@ export const useAutoSaveResume = ({
           label: "Retry",
           onClick: save,
         },
+        position: "bottom-right",
       });
     } finally {
       if (isMountedRef.current) {
-        updateState({
+        updateState((prev) => ({
           isSaving: false,
-          hasUnsavedChanges: changeIdToSave !== debouncedChangeId,
-        });
+          hasUnsavedChanges:
+            !!prev.error || changeIdToSave !== debouncedChangeId,
+        }));
       }
     }
   };
 
   useEffect(() => {
-    if (!state.hasUnsavedChanges || state.isSaving) return;
+    if (!state.hasUnsavedChanges || state.isSaving || state.error) return;
 
     save();
-  }, [state.hasUnsavedChanges, save, state.isSaving]);
+  }, [state.hasUnsavedChanges, save, state.isSaving, state.error]);
 
   return { ...state, save };
 };

@@ -1,4 +1,5 @@
 "use client";
+import { ResumeMetadata } from "@/hooks/use-resume";
 import { AppError } from "@/lib/errors";
 import { createContext, useContext } from "react";
 import { MobileEditorMode } from "../components/editor-bottom-nav";
@@ -6,6 +7,7 @@ import { AddStepInput, Step } from "../types/editor-resume.type";
 
 export type EditorContext = {
   currentResumeId?: string | null;
+  resumeMetadata: ResumeMetadata;
   resumeState: {
     isLoading: boolean;
     isSaving: boolean;
@@ -16,6 +18,7 @@ export type EditorContext = {
     save: () => Promise<void>;
   };
   updateSection: (step: Pick<Step, "id" | "data">) => void;
+  setSteps: (updater: Step[] | ((prev: Step[]) => Step[])) => void;
   stepper: {
     steps: Step[];
     enabledSteps: Step[];
@@ -41,11 +44,13 @@ export type EditorContext = {
     setSelectedTemplate: (template: string) => void;
     setColorHex: (colorHex: string) => void;
     setMobileSectionsOpen: (open: boolean) => void;
+    updateResumeMetadata: (data: Partial<ResumeMetadata>) => void;
   };
 };
 
 export const EditorContext = createContext<EditorContext>({
   updateSection: () => {},
+  setSteps: () => {},
   resumeState: {
     isLoading: false,
     isSaving: false,
@@ -80,6 +85,13 @@ export const EditorContext = createContext<EditorContext>({
     setSelectedTemplate: () => {},
     setColorHex: () => {},
     setMobileSectionsOpen: () => {},
+    updateResumeMetadata: () => {},
+  },
+  resumeMetadata: {
+    jobDescription: "",
+    atsScore: null,
+    colorHex: "default",
+    template: "aurora",
   },
 });
 

@@ -131,7 +131,7 @@ export function dateRange(
   isCurrent?: boolean,
 ): string {
   const s = formatDate(start);
-  const e = isCurrent ? "Present" : formatDate(end);
+  const e = isCurrent || !end ? "Present" : formatDate(end);
   if (s && e) return `${s} – ${e}`;
   if (s) return s;
   return "";
@@ -170,7 +170,10 @@ export function RichText({
           }}
         />
         <div
-          className={cn("richtext-content text-sm", className)}
+          className={cn(
+            "richtext-content text-sm whitespace-pre-line",
+            className,
+          )}
           dangerouslySetInnerHTML={{
             __html: html,
           }}

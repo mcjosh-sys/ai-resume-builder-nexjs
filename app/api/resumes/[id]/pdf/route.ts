@@ -35,8 +35,8 @@ export async function GET(
         template: getTemplateById(resume.template),
         colorHex: resume.colorHex,
         data: resumeData,
-      })
-    )
+      }),
+    ),
   );
   const css = await fetch(`${env.NEXT_PUBLIC_APP_URL}/css/pdf.css`).then(
     (res) => res.text(),

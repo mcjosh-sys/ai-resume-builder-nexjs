@@ -3,21 +3,61 @@
 import { stepsToAIResume } from "@/features/editor/helpers/resume-helpers";
 import { Step } from "@/features/editor/types/editor-resume.type";
 import { AppError } from "@/lib/errors";
-import { sanitizeAndParseJson } from "@/lib/utils";
+import { parseAIHTML, parseAIJSON } from "@/lib/utils";
 import { AIResume } from "../prompts";
-import { buildRewriteResumePrompt } from "../prompts/rewrite.prompt";
+import {
+  buildConvertToBulletsPrompt,
+  buildRewriteResumePrompt,
+  buildTailorToJobPrompt,
+} from "../prompts/rewrite.prompt";
 import { getMultiProvider } from "../providers/factory";
 
 export async function rewriteResume(steps: Step[]) {
   const provider = getMultiProvider();
   const prompt = buildRewriteResumePrompt(
-    stepsToAIResume(steps.filter((s) => s.enabled)),
+    stepsToAIResume(steps.filter((s) => s.enabled && s.id !== "header")),
   );
   const response = await provider.generate(prompt, "rewrite");
 
   try {
-    const parsed = sanitizeAndParseJson<AIResume>(response);
+    const parsed = parseAIJSON<AIResume>(response);
     return merge(steps, parsed);
+  } catch (error) {
+    throw new AppError("Failed to parse AI response", {
+      code: "AI_RESPONSE_PARSE_ERROR",
+      cause: error,
+    });
+  }
+}
+
+export async function tailorResume(jobDescription: string, steps: Step[]) {
+  const provider = getMultiProvider();
+  const prompt = buildTailorToJobPrompt(
+    jobDescription,
+    stepsToAIResume(steps.filter((s) => s.enabled && s.id !== "header")),
+  );
+  const response = await provider.generate(prompt, "analyze");
+
+  try {
+    const parsed = parseAIJSON<AIResume>(response);
+    return merge(steps, parsed);
+  } catch (error) {
+    throw new AppError("Failed to parse AI response", {
+      code: "AI_RESPONSE_PARSE_ERROR",
+      cause: error,
+    });
+  }
+}
+
+export async function convertToBullets(content: string) {
+  const provider = getMultiProvider();
+  const response = await provider.generate(
+    buildConvertToBulletsPrompt({ content }),
+    "rewrite",
+  );
+
+  try {
+    return parseAIHTML(response);
   } catch (error) {
     throw new AppError("Failed to parse AI response", {
       code: "AI_RESPONSE_PARSE_ERROR",

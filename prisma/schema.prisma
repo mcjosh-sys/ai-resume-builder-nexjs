@@ -19,16 +19,16 @@ enum SectionType {
   AWARD
 }
 
-enum SkillCategory {
-  TECHNICAL
-  SOFT
-  OTHER
-}
-
 enum BorderStyle {
   SQUIRCLE
   ROUNDED
   SQUARE
+}
+
+enum SkillCategory {
+  TECHNICAL
+  SOFT
+  OTHER
 }
 
 enum SkillLevel {
@@ -52,6 +52,7 @@ model Resume {
   firstName       String?
   lastName        String?
   jobTitle        String?
+  jobDescription  String?
   city            String?
   country         String?
   phone           String?

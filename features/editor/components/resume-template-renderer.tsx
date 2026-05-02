@@ -1,6 +1,11 @@
 import type { ResumeTemplate } from "../resource/templates";
 import { AuroraTemplate } from "./templates/aurora-template";
+import { AxisTemplate } from "./templates/axis-template";
+import { BannerTemplate } from "./templates/banner-template";
+import { CanvasTemplate } from "./templates/canvas-template";
 import { EmberTemplate } from "./templates/ember-template";
+import { FocalTemplate } from "./templates/focal-template";
+import { LedgerTemplate } from "./templates/ledger-template";
 import { NovaTemplate } from "./templates/nova-template";
 import { PrismTemplate } from "./templates/prism-template";
 import { SageTemplate } from "./templates/sage-template";
@@ -52,6 +57,7 @@ export function ResumeTemplateRenderer({
             .resume-preview-container .border-${baseColor}-${colorWeight} {
               border-color: ${colorHex} !important;
             }
+
           `,
           }}
         />
@@ -75,6 +81,21 @@ export function ResumeTemplateRenderer({
         </Case>
         <Case value="velvet">
           <VelvetTemplate template={template} data={data} />
+        </Case>
+        <Case value="axis">
+          <AxisTemplate template={template} data={data} />
+        </Case>
+        <Case value="banner">
+          <BannerTemplate template={template} data={data} />
+        </Case>
+        <Case value="canvas">
+          <CanvasTemplate template={template} data={data} />
+        </Case>
+        <Case value="focal">
+          <FocalTemplate template={template} data={data} />
+        </Case>
+        <Case value="ledger">
+          <LedgerTemplate template={template} data={data} />
         </Case>
         <Default>
           <AuroraTemplate template={template} data={data} />

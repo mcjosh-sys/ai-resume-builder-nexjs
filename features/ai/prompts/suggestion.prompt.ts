@@ -1,12 +1,13 @@
-import { AIResume, PromptBuilder } from ".";
+import { AIResume, PromptBuilder, SKILL_RULES } from ".";
 
-export interface AISuggestion {
+export interface AISuggestion<T = any> {
+  id: string;
   sectionId: string;
   itemId?: string;
   subIndex?: number;
   type: "replace" | "insert" | "delete";
-  original: string;
-  suggested: string;
+  original: T;
+  suggested: T;
   label: string;
 }
 
@@ -30,6 +31,7 @@ STRICT RULES:
 AISuggestion JSON format:
 [
   {
+    "id": "string - unique identifier for the suggestion",
     "sectionId": "string - the ID of the section",
     "itemId": "optional string - the ID of the item",
     "subIndex": "optional number for bullet position",
@@ -39,6 +41,9 @@ AISuggestion JSON format:
     "label": "short description of the suggestion"
   }
 ]
+
+${SKILL_RULES}
+
 Only return a JSON array. Do not include any explanations outside the JSON.
       `.trim();
   const userMessage = `

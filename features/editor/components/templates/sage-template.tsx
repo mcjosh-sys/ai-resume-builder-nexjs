@@ -59,7 +59,7 @@ export function SageTemplate({ template, data }: ResumeTemplateRendererProps) {
         <div key="education" className="space-y-2">
           <SectionTitle label="Education" accent={template.accent} minimal />
           {data.education.map((item, i) => (
-            <div key={i} className="space-y-0.5 text-xs">
+            <div key={i} className="space-y-0.5 text-xs break-after-avoid">
               <p className="font-medium">{item.degree}</p>
               <p className="text-muted-foreground">{item.school}</p>
               <p className="text-muted-foreground">

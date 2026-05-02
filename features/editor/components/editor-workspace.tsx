@@ -38,15 +38,22 @@ export function EditorWorkspace({
   selectedTemplate,
   onTemplateChange,
 }: EditorWorkspaceProps) {
-  const { stepper, editorState, resumeState: resume } = useEditorContext();
+  const {
+    stepper,
+    editorState,
+    resumeMetadata: { colorHex },
+  } = useEditorContext();
   const {
     steps,
     current: currentStep,
     next: nextStep,
     prev: prevStep,
   } = stepper;
-  const { colorHex, setColorHex } = editorState;
+  const { updateResumeMetadata } = editorState;
 
+  const handleColorChange = (colorHex: string) => {
+    updateResumeMetadata({ colorHex });
+  };
 
   const enabledSteps = useMemo(
     () => steps.filter((step) => step.enabled !== false),
@@ -84,7 +91,7 @@ export function EditorWorkspace({
                   id="color-picker"
                   type="color"
                   value={colorHex === "default" ? "#3b82f6" : colorHex}
-                  onChange={(e) => setColorHex(e.target.value)}
+                  onChange={(e) => handleColorChange(e.target.value)}
                   className="sr-only"
                 />
               </label>
@@ -94,7 +101,7 @@ export function EditorWorkspace({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setColorHex("default")}
+                onClick={() => handleColorChange("default")}
                 disabled={colorHex === "default"}
                 className="text-xs px-2 flex-1"
                 type="button"

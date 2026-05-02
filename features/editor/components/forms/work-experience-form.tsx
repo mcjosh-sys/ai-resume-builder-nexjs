@@ -125,7 +125,7 @@ const _WorkExperienceForm = ({
                   company: "",
                   startDate: "",
                   endDate: "",
-                  description: "",
+                  description: "<ul><li></li></ul>",
                 })
               }
             >

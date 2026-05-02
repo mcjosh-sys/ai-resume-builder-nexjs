@@ -1,6 +1,9 @@
 "use client";
 
-import { rewriteResume } from "@/features/ai/actions/rewrite.action";
+import {
+  rewriteResume,
+  tailorResume,
+} from "@/features/ai/actions/rewrite.action";
 import { getAISuggestions } from "@/features/ai/actions/suggestion.action";
 import { Step } from "@/features/editor/types/editor-resume.type";
 import { AppError } from "@/lib/errors";
@@ -9,15 +12,7 @@ import { toast } from "sonner";
 
 type Status = "idle" | "rewriting" | "suggesting" | "error";
 
-export function useResumeAI({
-  steps,
-  template,
-  colorHex,
-}: {
-  steps: Step[];
-  template?: string | null;
-  colorHex?: string | null;
-}) {
+export function useResumeAI({ steps }: { steps: Step[] }) {
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<AppError | null>(null);
 
@@ -26,7 +21,6 @@ export function useResumeAI({
     setError(null);
     try {
       const response = await rewriteResume(steps);
-      console.log(response);
       return response;
     } catch (error) {
       const err =
@@ -42,12 +36,31 @@ export function useResumeAI({
     }
   };
 
+  const tailor = async (jobDescription: string) => {
+    setStatus("rewriting");
+    setError(null);
+    try {
+      const response = await tailorResume(jobDescription, steps);
+      return response;
+    } catch (error) {
+      const err =
+        error instanceof AppError
+          ? error
+          : new AppError("Failed to tailor resume");
+      setError(err);
+      setStatus("error");
+      console.log(err);
+      toast.error("Failed to tailor resume");
+    } finally {
+      setStatus("idle");
+    }
+  };
+
   const getSuggestions = async (jobDescription: string) => {
     setStatus("suggesting");
     setError(null);
     try {
       const response = await getAISuggestions(steps, jobDescription);
-      console.log(response);
       return response;
     } catch (error) {
       const err =
@@ -67,6 +80,7 @@ export function useResumeAI({
     status,
     error,
     rewrite,
+    tailor,
     getSuggestions,
   };
 }

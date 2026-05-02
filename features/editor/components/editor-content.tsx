@@ -7,15 +7,23 @@ import { EditorCopilotPanel } from "./editor-copilot-panel";
 import { EditorWorkspace } from "./editor-workspace";
 
 export function EditorContent() {
-  const { editorState, resumeState: resume } = useEditorContext();
+  const {
+    editorState,
+    resumeState: resume,
+    resumeMetadata,
+  } = useEditorContext();
   const {
     activeMobileMode,
     activeDesktopWorkspaceTab,
-    selectedTemplate,
     setActiveMobileMode,
     setActiveDesktopWorkspaceTab,
-    setSelectedTemplate,
+    updateResumeMetadata,
   } = editorState;
+  const { template: selectedTemplate } = resumeMetadata;
+
+  const handleTemplateChange = (template: string) => {
+    updateResumeMetadata({ template });
+  };
   return (
     <div className="h-full w-full relative">
       {(resume.isSaving || resume.lastSaved) && (
@@ -46,7 +54,7 @@ export function EditorContent() {
             <EditorWorkspace
               mode="edit"
               selectedTemplate={selectedTemplate}
-              onTemplateChange={setSelectedTemplate}
+              onTemplateChange={handleTemplateChange}
             />
           )}
           {activeMobileMode === "copilot" && <EditorCopilotPanel mobile />}
@@ -54,7 +62,7 @@ export function EditorContent() {
             <EditorWorkspace
               mode="preview"
               selectedTemplate={selectedTemplate}
-              onTemplateChange={setSelectedTemplate}
+              onTemplateChange={handleTemplateChange}
             />
           )}
         </main>
@@ -99,7 +107,7 @@ export function EditorContent() {
               <EditorWorkspace
                 mode={activeDesktopWorkspaceTab}
                 selectedTemplate={selectedTemplate}
-                onTemplateChange={setSelectedTemplate}
+                onTemplateChange={handleTemplateChange}
               />
             </div>
           </div>

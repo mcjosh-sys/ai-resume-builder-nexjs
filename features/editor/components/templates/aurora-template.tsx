@@ -14,7 +14,7 @@ export function AuroraTemplate({
   const fullName = [data.firstName, data.lastName].filter(Boolean).join(" ");
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 scroll-pt-6">
       {/* Header is always first */}
       <header className="space-y-1">
         {fullName && <p className="text-2xl font-semibold">{fullName}</p>}
@@ -40,7 +40,7 @@ export function AuroraTemplate({
               <SectionTitle label="Experience" accent={template.accent} />
               {data.experience.map((item, i) => (
                 <div key={i} className="space-y-1">
-                  <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-start justify-between gap-2 break-inside-avoid">
                     <div>
                       <p className="text-sm font-medium">{item.position}</p>
                       <p className="text-xs text-muted-foreground">
@@ -66,7 +66,7 @@ export function AuroraTemplate({
             <section key="education" className="space-y-2">
               <SectionTitle label="Education" accent={template.accent} />
               {data.education.map((item, i) => (
-                <div key={i} className="space-y-0.5">
+                <div key={i} className="space-y-0.5 break-inside-avoid">
                   <p className="text-sm font-medium">{item.degree}</p>
                   <p className="text-xs text-muted-foreground">
                     {item.school}

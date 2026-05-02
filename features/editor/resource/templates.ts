@@ -83,6 +83,57 @@ export const RESUME_TEMPLATES = Object.freeze([
       subtitle: "Perfect for creative or executive roles",
     },
   } as const,
+  {
+    id: "axis",
+    name: "Axis",
+    description: "Left-border section headers with extending rule line and skill chips.",
+    accent: "bg-neutral-500",
+    preview: {
+      title: "Structured classic",
+      subtitle: "Ideal for technical and UX roles",
+    },
+  } as const,
+  {
+    id: "banner",
+    name: "Banner",
+    description: "Solid accent sidebar and top stripe with centered white header.",
+    accent: "bg-blue-600",
+    preview: {
+      title: "Bold two-column",
+      subtitle: "Clean and professional for business roles",
+    },
+  } as const,
+  {
+    id: "canvas",
+    name: "Canvas",
+    description: "Dark portrait sidebar with photo support and left-border experience entries.",
+    accent: "bg-slate-800",
+    supportsPhoto: true,
+    preview: {
+      title: "Dark portrait",
+      subtitle: "Premium look for creative professionals",
+    },
+  } as const,
+  {
+    id: "focal",
+    name: "Focal",
+    description: "Centered header and contact row with chip skills and two-column body.",
+    accent: "bg-indigo-600",
+    preview: {
+      title: "Centered two-column",
+      subtitle: "Great for academic and engineering roles",
+    },
+  } as const,
+  {
+    id: "ledger",
+    name: "Ledger",
+    description: "Tabular label-column rows with clean horizontal dividers.",
+    accent: "bg-gray-700",
+    preview: {
+      title: "Tabular layout",
+      subtitle: "Perfect for engineering and science roles",
+    },
+  } as const,
 ]);
 
 export type TemplateId =
@@ -92,7 +143,12 @@ export type TemplateId =
   | "nova"
   | "slate"
   | "prism"
-  | "velvet";
+  | "velvet"
+  | "axis"
+  | "banner"
+  | "canvas"
+  | "focal"
+  | "ledger";
 
 export function getTemplateById(id: any) {
   return RESUME_TEMPLATES.find((item) => item.id === id) ?? RESUME_TEMPLATES[0];

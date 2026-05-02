@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/ui/logo";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useFromNow } from "@/hooks/use-from-now";
-import { Menu, Save, Settings } from "lucide-react";
+import { Loader2, Menu, Save, Settings } from "lucide-react";
 import { ComponentProps } from "react";
 import { useEditorContext } from "../contexts/editor-context";
 
@@ -123,7 +123,7 @@ function SaveButton({
       {...props}
       disabled={isSaving || !hasUnsavedChanges}
     >
-      <Save />
+      {isSaving ? <Loader2 className="size-4 animate-spin" /> : <Save />}
       {iconOnly ? "" : "Save"}
     </Button>
   );

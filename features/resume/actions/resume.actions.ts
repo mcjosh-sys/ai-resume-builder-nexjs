@@ -10,6 +10,8 @@ export type RawResume = {
   photoUrl?: string | null;
   firstName?: string | null;
   lastName?: string | null;
+  jobDescription?: string | null;
+  atsScore?: number | null;
   colorHex?: string;
   template?: string;
   title?: string | null;
@@ -112,13 +114,12 @@ export async function createResume(
     ...rest
   } = data;
 
-  const atsScore = calculateAtsScore(data);
+  // const atsScore = calculateAtsScore(data);
 
   return await prisma.resume.create({
     data: {
       ...rest,
       userId,
-      atsScore,
       workExperiences: {
         create: workExperiences,
       },
@@ -169,14 +170,13 @@ export async function updateResume(
     ...rest
   } = data;
 
-  const atsScore = calculateAtsScore(data);
+  // const atsScore = calculateAtsScore(data);
 
   return await prisma.resume.update({
     where: { id, userId },
     data: {
       ...rest,
       userId,
-      atsScore,
       links: {
         deleteMany: {},
         create: links?.filter((link) => link.name && link.url) as any,
@@ -243,6 +243,60 @@ export async function deleteResume(id: string) {
   return prisma.resume.update({
     where: { id, userId },
     data: { isDeleted: true },
+  });
+}
+
+export async function cloneResume(id: string) {
+  const userId = await getUserId();
+
+  const source = await prisma.resume.findUnique({
+    where: { id, userId },
+    include: {
+      workExperiences: true,
+      educations: true,
+      otherFields: { orderBy: { order: "asc" } },
+      sections: { orderBy: { order: "asc" } },
+      links: true,
+      skills: true,
+      projects: { orderBy: { order: "asc" } },
+      certifications: { orderBy: { order: "asc" } },
+      awards: true,
+    },
+  });
+
+  if (!source) throw new AppError("Resume not found", { status: 404 });
+
+  const strip = <T extends { id: string; resumeId: string }>(
+    items: T[],
+  ): Omit<T, "id" | "resumeId">[] =>
+    items.map(({ id: _id, resumeId: _rid, ...rest }) => rest as Omit<T, "id" | "resumeId">);
+
+  return prisma.resume.create({
+    data: {
+      userId,
+      title: `Copy of ${source.title ?? "Untitled Resume"}`,
+      description: source.description,
+      template: source.template,
+      colorHex: source.colorHex,
+      photoUrl: source.photoUrl,
+      firstName: source.firstName,
+      lastName: source.lastName,
+      jobTitle: source.jobTitle,
+      summary: source.summary,
+      city: source.city,
+      country: source.country,
+      email: source.email,
+      jobDescription: source.jobDescription,
+      workExperiences: { create: strip(source.workExperiences) },
+      educations: { create: strip(source.educations) },
+      otherFields: { create: strip(source.otherFields) },
+      sections: { create: strip(source.sections) },
+      links: { create: strip(source.links) },
+      skills: { create: strip(source.skills) },
+      projects: { create: strip(source.projects) },
+      certifications: { create: strip(source.certifications) },
+      awards: { create: strip(source.awards) },
+    },
   });
 }
 
