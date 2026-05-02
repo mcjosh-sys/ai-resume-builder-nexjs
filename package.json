@@ -4,12 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "bun run build:pdf:css && next dev --port 3600",
-    "build": "bun run build:pdf:css && next build",
+    "build": "bun run build:pdf:css && next build && bun run postbuild",
     "start": "next start",
     "lint": "eslint",
     "shadcn:add": "bunx shadcn@latest add",
     "build:pdf:css": "bunx tailwindcss -i ./app/pdf.css -o ./public/css/pdf.css --minify",
-    "postinstall": "bunx prisma generate"
+    "postinstall": "bunx prisma generate",
+    "postbuild": "bun ./scripts/fix-chromium-path.js"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.36.5",

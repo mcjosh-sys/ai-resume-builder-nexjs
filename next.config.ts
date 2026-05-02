@@ -14,6 +14,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  output: "standalone",
   serverExternalPackages: ["@sparticuz/chromium"],
 };
 

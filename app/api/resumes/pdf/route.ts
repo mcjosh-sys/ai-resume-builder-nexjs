@@ -39,7 +39,7 @@ export async function getExecutablePath() {
   if (isLocal) {
     return "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
   }
-  return await getChromiumPath();
+  return await chromium.executablePath();
 }
 
 export async function POST(req: Request) {
