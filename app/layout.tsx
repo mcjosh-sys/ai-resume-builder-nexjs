@@ -1,4 +1,3 @@
-import { env } from "@/env";
 import { AppClerkProvider } from "@/providers/app-clerk-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 import type { Metadata } from "next";
@@ -33,11 +32,11 @@ export const metadata: Metadata = {
     title: "CV Copilot - AI Resume Builder",
     description:
       "Create job-winning resumes faster with AI. Improve bullet points and tailor your CV effortlessly.",
-    url: env.NEXT_PUBLIC_APP_URL,
+    url: "https://omega-cvcopilot.vercel.app",
     siteName: "CV Copilot",
     images: [
       {
-        url: `${env.NEXT_PUBLIC_APP_URL}/og-image.png`,
+        url: "https://omega-cvcopilot.vercel.app/og-image.png",
         width: 1200,
         height: 630,
         alt: "CV Copilot Preview",
@@ -51,7 +50,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "CV Copilot - AI Resume Builder",
     description: "Your AI copilot for writing standout resumes and CVs.",
-    images: [`${env.NEXT_PUBLIC_APP_URL}/og-image.png`],
+    images: ["https://omega-cvcopilot.vercel.app/og-image.png"],
   },
 };
 
