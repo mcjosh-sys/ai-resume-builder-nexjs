@@ -3,11 +3,11 @@
 import { useDimensions } from "@/hooks/use-dimensions";
 import { useEditorContext } from "../contexts/editor-context";
 import { stepsToTemplateResume } from "../helpers/resume-helpers";
+import type { ResumeTemplate } from "../resource/templates";
 import {
   ResumeTemplateRenderer,
   type TemplateResume,
 } from "./resume-template-renderer";
-import type { ResumeTemplate } from "../resource/templates";
 
 type ResumePreviewProps = {
   template: ResumeTemplate;
@@ -59,7 +59,7 @@ function ResumePreviewInner({
     >
       <div
         style={{ zoom: (1 / 794) * dimensions.width }}
-        className="p-6 resume-preview-container h-full w-full"
+        className="p-6 resume-preview-container h-fit w-full light"
       >
         <ResumeTemplateRenderer
           template={template}

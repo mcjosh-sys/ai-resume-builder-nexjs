@@ -3,12 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "bun run build:pdf:css && next dev --port 3600",
-    "build": "bun run build:pdf:css && next build",
+    "dev": "bun run build:css && next dev --port 3600",
+    "build": "bun run build:css && next build",
     "start": "next start",
     "lint": "eslint",
     "shadcn:add": "bunx shadcn@latest add",
-    "build:pdf:css": "bunx tailwindcss -i ./app/pdf.css -o ./public/css/pdf.css --minify",
+    "build:css": "bunx tailwindcss -i ./app/globals.css -o ./public/css/main.css --minify",
     "postinstall": "bunx prisma generate"
   },
   "dependencies": {

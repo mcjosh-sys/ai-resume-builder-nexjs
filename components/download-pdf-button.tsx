@@ -94,7 +94,7 @@ export function DownloadPdfButton({
 
     setIsLoading(true);
     try {
-      const css = await fetch("/css/pdf.css").then((res) => res.text());
+      const css = await fetch("/css/main.css").then((res) => res.text());
 
       const html = renderReactToHtml(css, resumePreview.innerHTML);
 

@@ -36,7 +36,7 @@ export async function GET(
       }),
     ),
   );
-  const css = await fetch(`${env.NEXT_PUBLIC_APP_URL}/css/pdf.css`).then(
+  const css = await fetch(`${env.NEXT_PUBLIC_APP_URL}/css/main.css`).then(
     (res) => res.text(),
   );
   const html = renderReactToHtml(css, content);

@@ -19,7 +19,7 @@ import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { ParagraphNode, TextNode } from "lexical";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AutocompleteNode } from "./editor/nodes/autocomplete-node";
 import { AutocompletePlugin } from "./editor/plugins/autocomplete-plugin";
 import { LinkPlugin } from "./editor/plugins/link-plugin";
@@ -29,6 +29,8 @@ import { FormatNumberedListButton } from "./editor/plugins/toolbar/block-format-
 import { FormatParagraphButton } from "./editor/plugins/toolbar/block-format-btns/format-paragraph-btn";
 import { FontFormatToolbarPlugin } from "./editor/plugins/toolbar/font-format-toolbar-plugin";
 import { LinkToolbarPlugin } from "./editor/plugins/toolbar/link-toolbar-plugin";
+import { htmlToEditorState } from "./editor/utils/rich-text-conversions";
+import { isSerializedRichText } from "./rich-text-renderer";
 
 const editorConfig: InitialConfigType = {
   namespace: "editor",
@@ -52,19 +54,68 @@ const editorConfig: InitialConfigType = {
 
 export default function RichTextEditor({
   placeholder = "Type something...",
-  value,
+  value: initialValue,
   onChange,
 }: {
   placeholder?: string;
   value?: string;
   onChange?: (value: string) => void;
 }) {
+  const [initialEditorState, setInitialEditorState] = useState<
+    string | undefined
+  >();
+  // To force recreation of Lexical if the initialValue changes externally
+  const [editorKey, setEditorKey] = useState(0);
+
+  useEffect(() => {
+    // If the component receives a value, and we haven't initialized it yet,
+    // OR if the external value changes substantially (e.g. switching items in a list),
+    // we need to parse and set it.
+    if (initialValue) {
+      // Don't re-parse if the external value is the same as what we just emitted
+      // We can't perfectly know if initialValue is exactly the current Lexical state
+      // without querying Lexical, but we can assume if it's already serialized rich text,
+      // it might be what we just passed up via onChange.
+      // A more robust way is to rely on the fact that forms usually remount or pass completely
+      // new values when switching contexts.
+
+      if (!isSerializedRichText(initialValue)) {
+        htmlToEditorState(initialValue)
+          .then((serializedState) => {
+            setInitialEditorState(serializedState);
+            setEditorKey((k) => k + 1);
+          })
+          .catch((error) => {
+            console.error("Error converting HTML to EditorState:", error);
+          });
+      } else {
+        // Only set it if it's different from our initial state to prevent
+        // infinite re-renders or losing cursor position if the parent echoes the value back.
+        if (initialEditorState !== initialValue) {
+          setInitialEditorState(initialValue);
+          setEditorKey((k) => k + 1);
+        }
+      }
+    } else if (initialValue === undefined || initialValue === "") {
+      // If it's explicitly cleared, we should clear the editor
+      if (initialEditorState !== undefined) {
+        setInitialEditorState(undefined);
+        setEditorKey((k) => k + 1);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialValue]); // Deliberately only watching initialValue
+
   return (
     <div className="bg-background w-full overflow-hidden rounded-lg border">
       <LexicalComposer
+        key={editorKey}
         initialConfig={{
           ...editorConfig,
-          editorState: value && value !== "" ? value : undefined,
+          editorState:
+            initialEditorState && initialEditorState !== ""
+              ? initialEditorState
+              : undefined,
         }}
       >
         <TooltipProvider>

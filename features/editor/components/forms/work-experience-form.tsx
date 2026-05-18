@@ -1,4 +1,4 @@
-import RichTextEditor2 from "@/components/rich-text-editor-2";
+import RichTextEditor from "@/components/rich-text-editor";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -252,7 +252,7 @@ function WorkExperienceItem({
           <FormItem>
             <FormLabel>Description</FormLabel>
             <FormControl>
-              <RichTextEditor2 value={field.value} onChange={field.onChange} />
+              <RichTextEditor value={field.value} onChange={field.onChange} />
             </FormControl>
             <FormMessage />
           </FormItem>

@@ -1,3 +1,5 @@
+import { editorStateToHtml } from "@/components/editor/utils/rich-text-conversions";
+import { isSerializedRichText } from "@/components/rich-text-renderer";
 import { cn } from "@/lib/utils";
 import { ResumeTemplate } from "../../resource/templates";
 
@@ -150,9 +152,14 @@ export function RichText({
   html?: string;
   className?: string;
 }) {
-  if (!html) return null;
-  const isHtml = /<[a-z][\s\S]*>/i.test(html);
-  if (isHtml) {
+  let content = html;
+  if (!content) return null;
+  const isHtml = /<[a-z][\s\S]*>/i.test(content);
+  const isRichText = isSerializedRichText(content);
+  if (isRichText) {
+    content = editorStateToHtml(content);
+  }
+  if (isHtml || isRichText) {
     return (
       <>
         <style
@@ -175,7 +182,7 @@ export function RichText({
             className,
           )}
           dangerouslySetInnerHTML={{
-            __html: html,
+            __html: content,
           }}
         />
       </>
@@ -183,7 +190,7 @@ export function RichText({
   }
   return (
     <p className={cn("text-sm leading-relaxed whitespace-pre-line", className)}>
-      {html}
+      {content}
     </p>
   );
 }
@@ -209,7 +216,7 @@ export function SectionTitle({
       <p
         className={cn(
           "text-xs font-semibold uppercase tracking-wide",
-          dark ? "text-neutral-700" : "text-muted-foreground",
+          // dark ? "text-neutral-700" : "text-muted-foreground",
         )}
       >
         {label}

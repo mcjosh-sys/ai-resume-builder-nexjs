@@ -45,6 +45,7 @@ export async function POST(req: Request) {
   //   executablePath: await getExecutablePath(),
   //   headless: true,
   // });
+  console.log("Generating PDF...");
   const browser = await getBrowser();
 
   try {
