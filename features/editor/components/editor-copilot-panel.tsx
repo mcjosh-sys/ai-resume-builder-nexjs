@@ -1,6 +1,5 @@
 "use client";
 
-import { LoadingButton } from "@/components/loading-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -23,20 +22,15 @@ import useSimpleDebounce from "@/hooks/use-simple-debounce";
 import { cn } from "@/lib/utils";
 import { useAISuggestionStore } from "@/store/ai-suggestions.store";
 import { Loader2, Sparkles, WandSparkles } from "lucide-react";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useEditorContext } from "../contexts/editor-context";
 import { applySuggestion } from "../helpers/ai-helpers";
+import { SuggestionList } from "./suggestion-list";
 
 type EditorCopilotPanelProps = {
   mobile?: boolean;
 };
-
-const SUGGESTION_COLORS = {
-  insert: "bg-emerald-50 border-emerald-200",
-  replace: "bg-blue-50 border-blue-200",
-  delete: "bg-amber-50 border-amber-200",
-} as const;
 
 const QUICK_ACTIONS = [
   { id: "rewrite", label: "Rewrite with AI", icon: WandSparkles },
@@ -58,9 +52,7 @@ export function EditorCopilotPanel({
     setSteps,
   } = useEditorContext();
 
-  const [status, setStatus] = useState<
-    "idle" | "suggesting" | `applying-${number | string}`
-  >("idle");
+  const [applyingId, setApplyingId] = useState<string | null>(null);
 
   const { suggestions, isSuggesting } = useAISuggestionStore();
   const removeSuggestion = useAISuggestionStore(
@@ -68,8 +60,6 @@ export function EditorCopilotPanel({
   );
 
   const [jobDescription, setJobDescription] = useState(resumeJobDescription);
-
-  const [isPending, startTransition] = useTransition();
 
   const {
     status: aiStatus,
@@ -148,7 +138,7 @@ export function EditorCopilotPanel({
   };
 
   const handleApplySuggestion = async (suggestion: AISuggestion) => {
-    setStatus(`applying-${suggestion.id}`);
+    setApplyingId(suggestion.id);
     try {
       const { isUpdated, steps: newSteps } = await applySuggestion(
         suggestion,
@@ -166,8 +156,10 @@ export function EditorCopilotPanel({
       console.error(err);
       toast.error("Failed to apply suggestion", { position: "top-right" });
     } finally {
-      removeSuggestion(suggestion.id);
-      setStatus("idle");
+      setTimeout(() => {
+        removeSuggestion(suggestion.id);
+        setApplyingId(null);
+      }, 1200);
     }
   };
 
@@ -335,41 +327,19 @@ export function EditorCopilotPanel({
               <CardHeader className="border-b pb-3">
                 <CardTitle className="text-xl">
                   AI Suggestions{" "}
-                  {suggestions.length > 0 && `(${suggestions.length})`}
+                  {suggestions.length > 0 && (
+                    <span className="ml-1 inline-flex items-center justify-center rounded-full bg-violet-100 px-2 py-0.5 text-sm font-semibold text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">
+                      {suggestions.length}
+                    </span>
+                  )}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3 pt-4">
-                {suggestions.length > 0 ? (
-                  suggestions.map((s) => (
-                    <div
-                      key={s.id}
-                      className={cn(
-                        "rounded-xl border p-4 py-6 relative",
-                        SUGGESTION_COLORS[s.type],
-                      )}
-                    >
-                      <span className="absolute top-1 right-1 p-1 text-xs border bg-muted text-muted-foreground rounded-xl">
-                        {s.sectionId}:{s.type}
-                      </span>
-                      <div className="pt-2">
-                        <p className="text-lg text-slate-700">{s.label}</p>
-                        <LoadingButton
-                          variant="default"
-                          className="mt-3 w-full"
-                          onClick={() => handleApplySuggestion(s)}
-                          disabled={isPending}
-                          isLoading={status === `applying-${s.id}`}
-                        >
-                          Apply Suggestion
-                        </LoadingButton>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="w-full p-4 flex items-center justify-center italic rounded-xl bg-muted border">
-                    No suggestions
-                  </div>
-                )}
+              <CardContent className="pt-4">
+                <SuggestionList
+                  suggestions={suggestions}
+                  applyingId={applyingId}
+                  onApply={handleApplySuggestion}
+                />
               </CardContent>
             </Card>
           </>
