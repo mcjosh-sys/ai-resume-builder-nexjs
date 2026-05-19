@@ -71,7 +71,7 @@ export async function GET(
       {
         headers: {
           "Content-Type": "application/pdf",
-          "Content-Disposition": `attachment; filename="${resume.firstName}_${resume.lastName}_${resume.jobTitle}.pdf"`,
+          "Content-Disposition": `attachment; filename="${resume.firstName} ${resume.lastName} - ${resume.jobTitle || "Resume"}.pdf"`,
         },
       },
     );
