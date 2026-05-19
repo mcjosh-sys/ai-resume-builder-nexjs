@@ -21,7 +21,8 @@ import { useModal } from "@/hooks/use-modal";
 import { useResumeAI } from "@/hooks/use-resume-ai";
 import useSimpleDebounce from "@/hooks/use-simple-debounce";
 import { cn } from "@/lib/utils";
-import { Loader2, Sparkles, WandSparkles, Zap } from "lucide-react";
+import { useAISuggestionStore } from "@/store/ai-suggestions.store";
+import { Loader2, Sparkles, WandSparkles } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { useEditorContext } from "../contexts/editor-context";
@@ -39,7 +40,7 @@ const SUGGESTION_COLORS = {
 
 const QUICK_ACTIONS = [
   { id: "rewrite", label: "Rewrite with AI", icon: WandSparkles },
-  { id: "bullets", label: "Improve Bullet Points", icon: Zap },
+  // { id: "bullets", label: "Improve Bullet Points", icon: Zap },
   { id: "tailor", label: "Tailor to Job", icon: Sparkles },
 ] as const;
 
@@ -61,7 +62,10 @@ export function EditorCopilotPanel({
     "idle" | "suggesting" | `applying-${number | string}`
   >("idle");
 
-  const [suggestions, setSuggestions] = useState<AISuggestion[]>([]);
+  const { suggestions, isSuggesting } = useAISuggestionStore();
+  const removeSuggestion = useAISuggestionStore(
+    (state) => state.removeSuggestion,
+  );
 
   const [jobDescription, setJobDescription] = useState(resumeJobDescription);
 
@@ -84,17 +88,14 @@ export function EditorCopilotPanel({
     }
   }, [debouncedJobDescription, updateResumeMetadata]);
 
-  // ── Modal ──────────────────────────────────────────────────────────────────
   const aiModal = useModal<AIResultModalData>();
 
   const handleAccept = (data: AIResultModalData) => {
     if (data.action === "rewrite" && data.newSteps) {
       setSteps(data.newSteps);
     }
-    // "suggestions" are informational — user has already read the diff
   };
 
-  // ── Quick action handlers ──────────────────────────────────────────────────
   const handleRewrite = async () => {
     aiModal.open();
     aiModal.setIsLoading(true);
@@ -117,21 +118,9 @@ export function EditorCopilotPanel({
     }
   };
 
-  const handleAnalyzeAndOptimize = async () => {
+  const handleAnalyzeAndOptimize = () => {
     if (!jobDescription.trim()) return;
-    setStatus("suggesting");
-    try {
-      const suggestions = await getSuggestions(jobDescription);
-      if (suggestions?.length) {
-        setSuggestions(suggestions);
-      } else {
-        toast.info("No suggestions found.", { position: "top-right" });
-      }
-    } catch {
-      toast.error("Failed to get suggestions", { position: "top-right" });
-    } finally {
-      setStatus("idle");
-    }
+    getSuggestions(jobDescription);
   };
 
   const handleTailorJob = async () => {
@@ -177,14 +166,14 @@ export function EditorCopilotPanel({
       console.error(err);
       toast.error("Failed to apply suggestion", { position: "top-right" });
     } finally {
-      setSuggestions((prev) => prev.filter((s) => s.id !== suggestion.id));
+      removeSuggestion(suggestion.id);
       setStatus("idle");
     }
   };
 
   const quickActionHandlers: Record<string, () => void> = {
     rewrite: handleRewrite,
-    bullets: handleRewrite, // same action — rewrite focuses on bullets
+    bullets: handleRewrite,
     tailor: () => setIsTailorModalOpen(true),
   };
 
@@ -325,9 +314,9 @@ export function EditorCopilotPanel({
                 <Button
                   className="w-full bg-linear-to-r from-violet-600 to-blue-600"
                   onClick={handleAnalyzeAndOptimize}
-                  disabled={aiStatus === "suggesting" || !jobDescription.trim()}
+                  disabled={isSuggesting || !jobDescription.trim()}
                 >
-                  {status === "suggesting" ? (
+                  {isSuggesting ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Analyzing...
@@ -360,18 +349,20 @@ export function EditorCopilotPanel({
                       )}
                     >
                       <span className="absolute top-1 right-1 p-1 text-xs border bg-muted text-muted-foreground rounded-xl">
-                        {s.sectionId}
+                        {s.sectionId}:{s.type}
                       </span>
-                      <p className="text-lg text-slate-700">{s.label}</p>
-                      <LoadingButton
-                        variant="outline"
-                        className="mt-3 w-full"
-                        onClick={() => handleApplySuggestion(s)}
-                        disabled={isPending}
-                        isLoading={status === `applying-${s.id}`}
-                      >
-                        Apply Suggestion
-                      </LoadingButton>
+                      <div className="pt-2">
+                        <p className="text-lg text-slate-700">{s.label}</p>
+                        <LoadingButton
+                          variant="default"
+                          className="mt-3 w-full"
+                          onClick={() => handleApplySuggestion(s)}
+                          disabled={isPending}
+                          isLoading={status === `applying-${s.id}`}
+                        >
+                          Apply Suggestion
+                        </LoadingButton>
+                      </div>
                     </div>
                   ))
                 ) : (

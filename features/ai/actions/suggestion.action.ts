@@ -1,27 +1,20 @@
 "use server";
 
-import { stepsToAIResume } from "@/features/editor/helpers/resume-helpers";
-import { Step } from "@/features/editor/types/editor-resume.type";
 import { AppError } from "@/lib/errors";
 import { parseAIJSON } from "@/lib/utils";
+import { AIResume } from "../prompts";
 import {
   AISuggestion,
   buildSuggestionPrompt,
 } from "../prompts/suggestion.prompt";
 import { getMultiProvider } from "../providers/factory";
 
-export async function getAISuggestions(steps: Step[], jobDescription: string) {
+export async function getAISuggestions(
+  resume: AIResume,
+  jobDescription: string,
+) {
   const provider = getMultiProvider();
-  const prompt = buildSuggestionPrompt(
-    jobDescription,
-    stepsToAIResume(
-      steps.filter(
-        (s) =>
-          s.enabled &&
-          ["summary", "experience", "projects", "skills"].includes(s.id),
-      ),
-    ),
-  );
+  const prompt = buildSuggestionPrompt(jobDescription, resume);
   const response = await provider.generate(prompt, "suggestion");
 
   try {

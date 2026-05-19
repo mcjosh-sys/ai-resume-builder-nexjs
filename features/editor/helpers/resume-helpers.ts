@@ -1,8 +1,11 @@
+import { editorStateToHtml } from "@/components/editor/utils/rich-text-conversions";
+import { isSerializedRichText } from "@/components/rich-text-renderer";
 import { AIResume } from "@/features/ai/prompts";
 import { RawResume } from "@/features/resume/actions/resume.actions";
 import { $Enums, Prisma } from "@/lib/generated/prisma";
 import { parseDateInput } from "@/lib/utils";
 import { WithoutResume } from "@/types";
+import { cloneDeep } from "lodash";
 import { TemplateResume } from "../components/resume-template-renderer";
 import { getIconById } from "../resource/icons";
 import { DEFAULT_STEPS } from "../resource/steps";
@@ -410,11 +413,38 @@ export function parseResumeToTemplateResume(resume: RawResume): TemplateResume {
 }
 
 export function stepsToAIResume(steps: Step[]): AIResume {
+  const formatItemDescription = (item: any) => {
+    if (item.description && isSerializedRichText(item.description)) {
+      item.description = editorStateToHtml(item.description);
+    }
+    return item;
+  };
+
   return steps.map((step) => {
+    const content = cloneDeep(step.data);
+    if (
+      content &&
+      ([
+        "experience",
+        "education",
+        "projects",
+        "certifications",
+        "awards",
+      ].includes(step.id) ||
+        step.id.startsWith("other-field-"))
+    ) {
+      Object.entries(content).forEach(([key, value]) => {
+        if (Array.isArray(value)) {
+          (content as any)[key] = value.map(formatItemDescription);
+        } else if (key === "description") {
+          (content as any).description = formatItemDescription(value);
+        }
+      });
+    }
     return {
       id: step.id,
       heading: step.title,
-      content: step.data,
+      content,
     };
   });
 }

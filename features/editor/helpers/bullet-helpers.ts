@@ -1,3 +1,5 @@
+import { editorStateToHtml } from "@/components/editor/utils/rich-text-conversions";
+import { isSerializedRichText } from "@/components/rich-text-renderer";
 import { capitalizeFirst } from "@/lib/utils";
 
 export function isBullet(content: string): boolean {
@@ -42,7 +44,13 @@ export function extractListItemsDOM(html: string): string[] {
 export function extractListItems(html: string): string[] {
   if (!html) return [];
 
-  let text = html
+  let _html = html;
+
+  if (isSerializedRichText(_html)) {
+    _html = editorStateToHtml(_html);
+  }
+
+  let text = _html
     .replace(/```[\w]*\n?/g, "")
     .replace(/```/g, "")
     .trim();

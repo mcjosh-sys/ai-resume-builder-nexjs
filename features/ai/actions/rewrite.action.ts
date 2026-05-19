@@ -1,7 +1,5 @@
 "use server";
 
-import { stepsToAIResume } from "@/features/editor/helpers/resume-helpers";
-import { Step } from "@/features/editor/types/editor-resume.type";
 import { AppError } from "@/lib/errors";
 import { parseAIHTML, parseAIJSON } from "@/lib/utils";
 import { AIResume } from "../prompts";
@@ -12,16 +10,14 @@ import {
 } from "../prompts/rewrite.prompt";
 import { getMultiProvider } from "../providers/factory";
 
-export async function rewriteResume(steps: Step[]) {
+export async function rewriteResume(resume: AIResume) {
   const provider = getMultiProvider();
-  const prompt = buildRewriteResumePrompt(
-    stepsToAIResume(steps.filter((s) => s.enabled && s.id !== "header")),
-  );
+  const prompt = buildRewriteResumePrompt(resume);
   const response = await provider.generate(prompt, "rewrite");
 
   try {
     const parsed = parseAIJSON<AIResume>(response);
-    return merge(steps, parsed);
+    return parsed;
   } catch (error) {
     throw new AppError("Failed to parse AI response", {
       code: "AI_RESPONSE_PARSE_ERROR",
@@ -30,17 +26,14 @@ export async function rewriteResume(steps: Step[]) {
   }
 }
 
-export async function tailorResume(jobDescription: string, steps: Step[]) {
+export async function tailorResume(jobDescription: string, resume: AIResume) {
   const provider = getMultiProvider();
-  const prompt = buildTailorToJobPrompt(
-    jobDescription,
-    stepsToAIResume(steps.filter((s) => s.enabled && s.id !== "header")),
-  );
+  const prompt = buildTailorToJobPrompt(jobDescription, resume);
   const response = await provider.generate(prompt, "analyze");
 
   try {
     const parsed = parseAIJSON<AIResume>(response);
-    return merge(steps, parsed);
+    return parsed;
   } catch (error) {
     throw new AppError("Failed to parse AI response", {
       code: "AI_RESPONSE_PARSE_ERROR",
@@ -64,11 +57,4 @@ export async function convertToBullets(content: string) {
       cause: error,
     });
   }
-}
-
-function merge(steps: Step[], data: AIResume) {
-  return steps.map((step) => ({
-    ...step,
-    data: data.find((s) => s.id === step.id)?.content ?? step.data,
-  }));
 }
