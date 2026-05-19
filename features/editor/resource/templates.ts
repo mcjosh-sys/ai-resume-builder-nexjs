@@ -4,6 +4,7 @@ export type ResumeTemplate = {
   description: string;
   accent: string;
   supportsPhoto?: boolean;
+  noMargins?: boolean;
   preview: {
     title: string;
     subtitle: string;
@@ -48,6 +49,7 @@ export const RESUME_TEMPLATES = Object.freeze([
     supportsPhoto: true,
     description: "Two-column layout with a dark sidebar.",
     accent: "bg-violet-500",
+    noMargins: true,
     preview: {
       title: "Modern two-column",
       subtitle: "Great for technical and creative roles",
@@ -68,6 +70,7 @@ export const RESUME_TEMPLATES = Object.freeze([
     name: "Prism",
     description: "Bold accent header bar with a structured grid.",
     accent: "bg-rose-500",
+    noMargins: true,
     preview: {
       title: "Bold & structured",
       subtitle: "Great for standing out in tech",
@@ -86,7 +89,8 @@ export const RESUME_TEMPLATES = Object.freeze([
   {
     id: "axis",
     name: "Axis",
-    description: "Left-border section headers with extending rule line and skill chips.",
+    description:
+      "Left-border section headers with extending rule line and skill chips.",
     accent: "bg-neutral-500",
     preview: {
       title: "Structured classic",
@@ -96,8 +100,10 @@ export const RESUME_TEMPLATES = Object.freeze([
   {
     id: "banner",
     name: "Banner",
-    description: "Solid accent sidebar and top stripe with centered white header.",
+    description:
+      "Solid accent sidebar and top stripe with centered white header.",
     accent: "bg-blue-600",
+    noMargins: true,
     preview: {
       title: "Bold two-column",
       subtitle: "Clean and professional for business roles",
@@ -106,9 +112,11 @@ export const RESUME_TEMPLATES = Object.freeze([
   {
     id: "canvas",
     name: "Canvas",
-    description: "Dark portrait sidebar with photo support and left-border experience entries.",
+    description:
+      "Dark portrait sidebar with photo support and left-border experience entries.",
     accent: "bg-slate-800",
     supportsPhoto: true,
+    noMargins: true,
     preview: {
       title: "Dark portrait",
       subtitle: "Premium look for creative professionals",
@@ -117,7 +125,8 @@ export const RESUME_TEMPLATES = Object.freeze([
   {
     id: "focal",
     name: "Focal",
-    description: "Centered header and contact row with chip skills and two-column body.",
+    description:
+      "Centered header and contact row with chip skills and two-column body.",
     accent: "bg-indigo-600",
     preview: {
       title: "Centered two-column",

@@ -105,6 +105,7 @@ export function DownloadPdfButton({
         },
         body: JSON.stringify({
           html,
+          noMargins: templateData.template?.noMargins,
         }),
       });
 

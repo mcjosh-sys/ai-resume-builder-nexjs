@@ -24,13 +24,14 @@ export async function GET(
   }
 
   const resumeData = parseResumeToTemplateResume(resume);
+  const templateData = getTemplateById(resume.template);
   const { renderToString } = await import("react-dom/server");
   const content = renderToString(
     createElement(
       "div",
       { className: "resume-preview-container" },
       createElement(ResumeTemplateRenderer, {
-        template: getTemplateById(resume.template),
+        template: templateData,
         colorHex: resume.colorHex,
         data: resumeData,
       }),
@@ -53,12 +54,19 @@ export async function GET(
 
     const pdfBuffer = await page.pdf({
       format: "A4",
-      margin: {
-        top: "0.6cm",
-        right: "0.6cm",
-        bottom: "0.6cm",
-        left: "0.6cm",
-      },
+      margin: templateData.noMargins
+        ? {
+            top: "0cm",
+            right: "0cm",
+            bottom: "0cm",
+            left: "0cm",
+          }
+        : {
+            top: "0.6cm",
+            right: "0.6cm",
+            bottom: "0.6cm",
+            left: "0.6cm",
+          },
       printBackground: true,
     });
 
