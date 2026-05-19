@@ -61,6 +61,11 @@ export type ResumeAward = {
   description?: string;
 };
 
+export type ResumeLanguage = {
+  name: string;
+  level?: string;
+};
+
 export type ResumeOtherField = {
   id: string;
   title?: string;
@@ -80,6 +85,7 @@ export type ResumeSection =
   | { id: "projects" }
   | { id: "certifications" }
   | { id: "awards" }
+  | { id: "languages" }
   | { id: string; title: string }; // other-field or custom sections (not rendered yet)
 
 export type TemplateResume = {
@@ -101,6 +107,7 @@ export type TemplateResume = {
   experience: ResumeExperience[];
   education: ResumeEducation[];
   skills: ResumeSkill[];
+  languages: ResumeLanguage[];
   projects: ResumeProject[];
   certifications: ResumeCertification[];
   awards: ResumeAward[];

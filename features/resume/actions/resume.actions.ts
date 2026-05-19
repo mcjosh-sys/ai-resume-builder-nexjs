@@ -30,6 +30,7 @@ export type RawResume = {
   projects?: Prisma.ProjectCreateManyResumeInput[];
   certifications?: Prisma.CertificationCreateManyResumeInput[];
   awards?: Prisma.AwardCreateManyResumeInput[];
+  languages?: Prisma.LanguageCreateManyResumeInput[];
   updatedAt?: Date;
   createdAt?: Date;
 };
@@ -57,6 +58,9 @@ export async function getResume(id: string) {
         orderBy: { order: "asc" },
       },
       awards: {
+        orderBy: { order: "asc" },
+      },
+      languages: {
         orderBy: { order: "asc" },
       },
     },
@@ -110,6 +114,7 @@ export async function createResume(
     projects,
     certifications,
     awards,
+    languages,
     phone: _,
     ...rest
   } = data;
@@ -147,6 +152,9 @@ export async function createResume(
       awards: {
         create: awards ?? [],
       },
+      languages: {
+        create: languages ?? [],
+      },
     },
   });
 }
@@ -166,6 +174,7 @@ export async function updateResume(
     projects,
     certifications,
     awards,
+    languages,
     photo: _,
     ...rest
   } = data;
@@ -212,6 +221,10 @@ export async function updateResume(
       awards: {
         deleteMany: {},
         create: awards ?? [],
+      },
+      languages: {
+        deleteMany: {},
+        create: languages ?? [],
       },
     },
   });
@@ -261,6 +274,7 @@ export async function cloneResume(id: string) {
       projects: { orderBy: { order: "asc" } },
       certifications: { orderBy: { order: "asc" } },
       awards: true,
+      languages: { orderBy: { order: "asc" } },
     },
   });
 
@@ -296,6 +310,7 @@ export async function cloneResume(id: string) {
       projects: { create: strip(source.projects) },
       certifications: { create: strip(source.certifications) },
       awards: { create: strip(source.awards) },
+      languages: { create: strip(source.languages) },
     },
   });
 }

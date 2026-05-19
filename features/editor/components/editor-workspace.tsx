@@ -18,6 +18,7 @@ import CertificationsForm from "./forms/certifications-form";
 import CustomSectionForm from "./forms/custom-section-form";
 import EducationForm from "./forms/education-form";
 import { HeaderForm } from "./forms/header-form";
+import LanguagesForm from "./forms/languages-form";
 import ProjectsForm from "./forms/projects-form";
 import SkillsForm from "./forms/skills-form";
 import SummaryForm from "./forms/summary-form";
@@ -159,6 +160,8 @@ export function EditorWorkspace({
         <AwardsForm />
 
         <SkillsForm />
+
+        <LanguagesForm />
 
         <CustomSectionForm />
 

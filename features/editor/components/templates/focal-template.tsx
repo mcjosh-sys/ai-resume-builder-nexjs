@@ -40,8 +40,8 @@ export function FocalTemplate({ template, data }: ResumeTemplateRendererProps) {
     ...(data.links ?? []).map((l) => l.url),
   ].filter(Boolean);
 
-  // Split sections: left column: education + skills + certifications; right: experience + projects + awards + summary
-  const leftSectionIds = ["education", "skills", "certifications"];
+  // Split sections: left column: education + skills + certifications + languages; right: experience + projects + awards + summary
+  const leftSectionIds = ["education", "skills", "certifications", "languages"];
   const rightSectionIds = ["summary", "experience", "projects", "awards"];
 
   return (
@@ -124,6 +124,28 @@ export function FocalTemplate({ template, data }: ResumeTemplateRendererProps) {
                         )}
                       >
                         {skill.name}
+                      </span>
+                    ))}
+                  </div>
+                </section>
+              );
+            }
+
+            if (section.id === "languages" && data.languages.length > 0) {
+              return (
+                <section key="languages" className="space-y-1.5">
+                  <CrestSectionLabel label="Languages" accent={accentBg} />
+                  <div className="flex flex-wrap gap-1.5 pt-0.5">
+                    {data.languages.map((lang, i) => (
+                      <span
+                        key={i}
+                        className={cn(
+                          "flex items-baseline gap-1 rounded-full border px-2 py-0.5 text-[10px] text-neutral-600",
+                          accentBg.replace(/bg-([a-z]+)-\d+/, "border-$1-200"),
+                        )}
+                      >
+                        <span className="font-semibold">{lang.name}</span>
+                        {lang.level && <span className="opacity-70 text-[8px]">{lang.level}</span>}
                       </span>
                     ))}
                   </div>

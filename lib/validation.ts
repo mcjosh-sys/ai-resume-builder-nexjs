@@ -96,6 +96,23 @@ export type SkillValues = z.infer<typeof skillSchema>;
 
 export type Skill = NonNullable<z.infer<typeof skillSchema>["skills"]>[number];
 
+export const languageSchema = z.object({
+  languages: z
+    .array(
+      z.object({
+        name: optionalString,
+        level: optionalString,
+      }),
+    )
+    .optional(),
+});
+
+export type LanguageValues = z.infer<typeof languageSchema>;
+
+export type Language = NonNullable<
+  z.infer<typeof languageSchema>["languages"]
+>[number];
+
 export const otherFieldSchema = z
   .object({
     title: optionalString,

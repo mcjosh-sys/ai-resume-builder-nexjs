@@ -84,6 +84,7 @@ export function ResumePreview({
       experience: [],
       education: [],
       skills: [],
+      languages: [],
       projects: [],
       certifications: [],
       awards: [],

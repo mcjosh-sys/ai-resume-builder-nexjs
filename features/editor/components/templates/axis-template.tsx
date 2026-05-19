@@ -91,6 +91,25 @@ export function AxisTemplate({ template, data }: ResumeTemplateRendererProps) {
           );
         }
 
+        if (section.id === "languages" && data.languages.length > 0) {
+          return (
+            <section key="languages" className="space-y-1.5">
+              <GallegoSectionTitle label="Languages" accent={accentBg} />
+              <div className="flex flex-wrap gap-1.5">
+                {data.languages.map((lang, i) => (
+                  <span
+                    key={i}
+                    className="flex items-baseline gap-1 rounded border border-neutral-300 px-2 py-0.5 text-xs text-neutral-700"
+                  >
+                    <span className="font-medium">{lang.name}</span>
+                    {lang.level && <span className="text-[10px] opacity-70">{lang.level}</span>}
+                  </span>
+                ))}
+              </div>
+            </section>
+          );
+        }
+
         if (section.id === "experience" && data.experience.length > 0) {
           return (
             <section key="experience" className="space-y-3">

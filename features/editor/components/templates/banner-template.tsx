@@ -41,7 +41,7 @@ export function BannerTemplate({
   const accentLight = accentBg.replace(/bg-([a-z]+)-\d+/, "bg-$1-50");
 
   const hasSidebar = data.sections.some((s) =>
-    ["education", "skills", "certifications", "awards"].includes(s.id),
+    ["education", "skills", "certifications", "awards", "languages"].includes(s.id),
   );
 
   return (
@@ -138,6 +138,23 @@ export function BannerTemplate({
                       <p key={i} className="text-xs text-white flex items-start gap-1.5">
                         <span className="mt-0.5 h-1.5 w-1.5 rounded-sm bg-white opacity-70 shrink-0" />
                         {skill.name}
+                      </p>
+                    ))}
+                  </div>
+                );
+              }
+
+              if (section.id === "languages" && data.languages.length > 0) {
+                return (
+                  <div key="languages" className="space-y-1.5">
+                    <SidebarHeading label="Languages" />
+                    {data.languages.map((lang, i) => (
+                      <p key={i} className="text-xs text-white flex items-start gap-1.5">
+                        <span className="mt-0.5 h-1.5 w-1.5 rounded-sm bg-white opacity-70 shrink-0" />
+                        <span>
+                          <span className="font-medium">{lang.name}</span>
+                          {lang.level && <span className="ml-1 opacity-70">({lang.level})</span>}
+                        </span>
                       </p>
                     ))}
                   </div>
@@ -269,7 +286,7 @@ export function BannerTemplate({
 
             // Sidebar sections handled in the sidebar column
             if (
-              ["education", "skills", "certifications", "awards"].includes(
+              ["education", "skills", "certifications", "awards", "languages"].includes(
                 section.id,
               )
             ) {

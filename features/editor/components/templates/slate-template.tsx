@@ -120,6 +120,18 @@ export function SlateTemplate({ template, data }: ResumeTemplateRendererProps) {
             </section>
           );
         }
+        if (section.id === "languages" && data.languages.length > 0) {
+          return (
+            <section key="languages">
+              <p className="text-xs font-bold uppercase tracking-widest border-b border-neutral-300 pb-0.5 mb-1.5">
+                Languages
+              </p>
+              <p className="text-xs text-neutral-700">
+                {data.languages.map((l) => `${l.name}${l.level ? ` (${l.level})` : ""}`).join(" · ")}
+              </p>
+            </section>
+          );
+        }
         if (section.id === "projects" && data.projects.length > 0) {
           return (
             <section key="projects">

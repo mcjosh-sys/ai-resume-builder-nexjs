@@ -17,6 +17,7 @@ export function SageTemplate({ template, data }: ResumeTemplateRendererProps) {
     "education",
     "certifications",
     "awards",
+    "languages",
   ];
   const rightSectionIds = ["experience", "projects"];
 
@@ -48,6 +49,24 @@ export function SageTemplate({ template, data }: ResumeTemplateRendererProps) {
                 className="rounded-full bg-muted px-2 py-0.5 text-xs"
               >
                 {skill.name}
+              </span>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    if (id === "languages" && data.languages.length > 0) {
+      return (
+        <div key="languages" className="space-y-1.5">
+          <SectionTitle label="Languages" accent={template.accent} minimal />
+          <div className="flex flex-wrap gap-1">
+            {data.languages.map((lang, i) => (
+              <span
+                key={i}
+                className="flex items-baseline gap-1 rounded-full bg-muted px-2 py-0.5 text-xs"
+              >
+                <span className="font-medium">{lang.name}</span>
+                {lang.level && <span className="text-[10px] opacity-70">({lang.level})</span>}
               </span>
             ))}
           </div>

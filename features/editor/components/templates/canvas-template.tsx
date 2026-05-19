@@ -115,6 +115,25 @@ export function CanvasTemplate({
             );
           }
 
+          if (section.id === "languages" && data.languages.length > 0) {
+            return (
+              <div key="languages">
+                <MercadoSidebarHeading label="Languages" />
+                <div className="flex flex-wrap gap-1">
+                  {data.languages.map((lang, i) => (
+                    <span
+                      key={i}
+                      className="flex items-baseline gap-1 rounded border border-white border-opacity-30 px-1.5 py-0.5 text-[10px] text-white"
+                    >
+                      <span className="font-medium">{lang.name}</span>
+                      {lang.level && <span className="opacity-70">({lang.level})</span>}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            );
+          }
+
           if (section.id === "certifications" && data.certifications.length > 0) {
             return (
               <div key="certifications">
@@ -272,7 +291,7 @@ export function CanvasTemplate({
 
           // Sidebar sections handled in the sidebar
           if (
-            ["education", "skills", "certifications", "awards"].includes(
+            ["education", "skills", "certifications", "awards", "languages"].includes(
               section.id,
             )
           ) {

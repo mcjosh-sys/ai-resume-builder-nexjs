@@ -128,6 +128,31 @@ export function PrismTemplate({ template, data }: ResumeTemplateRendererProps) {
               </section>
             );
           }
+          if (section.id === "languages" && data.languages.length > 0) {
+            return (
+              <section key="languages" className="space-y-1.5">
+                <div className={cn("h-0.5 w-8 rounded-full", accentClass)} />
+                <p className="text-xs font-bold uppercase tracking-widest text-neutral-500">
+                  Languages
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {data.languages.map((lang, i) => (
+                    <span
+                      key={i}
+                      className={cn(
+                        "flex items-baseline gap-1 rounded px-2 py-0.5 text-xs text-white",
+                        accentClass,
+                        "opacity-80",
+                      )}
+                    >
+                      <span className="font-medium">{lang.name}</span>
+                      {lang.level && <span className="text-[10px] opacity-80">{lang.level}</span>}
+                    </span>
+                  ))}
+                </div>
+              </section>
+            );
+          }
           if (section.id === "projects" && data.projects.length > 0) {
             return (
               <section key="projects" className="space-y-2">

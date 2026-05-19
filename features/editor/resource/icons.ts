@@ -4,6 +4,7 @@ import {
   FaBriefcase,
   FaCode,
   FaFolderOpen,
+  FaGlobe,
   FaScrewdriverWrench,
   FaStar,
   FaUser,
@@ -21,6 +22,7 @@ const ICON_IDS = [
   "tools",
   "star",
   "contact",
+  "globe",
 ] as const;
 
 export type IconId = (typeof ICON_IDS)[number];
@@ -39,6 +41,7 @@ export const ICON_OPTIONS: Array<{
   { id: "tools", label: "Tools", icon: FaScrewdriverWrench },
   { id: "star", label: "Custom", icon: FaStar },
   { id: "contact", label: "Contact", icon: MdContacts },
+  { id: "globe", label: "Languages", icon: FaGlobe },
 ];
 
 export function getIconById(id?: string): NonNullable<Step["icon"]> {

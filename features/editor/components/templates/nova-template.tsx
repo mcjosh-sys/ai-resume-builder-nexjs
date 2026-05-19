@@ -79,6 +79,30 @@ export function NovaTemplate({ template, data }: ResumeTemplateRendererProps) {
             </div>
           )}
 
+        {/* Languages in sidebar */}
+        {data.sections.some((s) => s.id === "languages") &&
+          data.languages.length > 0 && (
+            <div className="space-y-1.5">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400">
+                Languages
+              </p>
+              {data.languages.map((lang, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <span
+                    className={cn(
+                      "h-1.5 w-1.5 rounded-full shrink-0",
+                      accentBg,
+                    )}
+                  />
+                  <span className="text-xs text-neutral-200 flex items-baseline gap-1">
+                    <span className="font-medium">{lang.name}</span>
+                    {lang.level && <span className="text-[10px] opacity-70">({lang.level})</span>}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+
         {/* Education in sidebar */}
         {data.sections.some((s) => s.id === "education") &&
           data.education.length > 0 && (

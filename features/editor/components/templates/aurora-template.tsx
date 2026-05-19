@@ -102,6 +102,25 @@ export function AuroraTemplate({
           );
         }
 
+        if (section.id === "languages" && data.languages.length > 0) {
+          return (
+            <section key="languages" className="space-y-2">
+              <SectionTitle label="Languages" accent={template.accent} />
+              <div className="flex flex-wrap gap-1.5">
+                {data.languages.map((lang, i) => (
+                  <span
+                    key={i}
+                    className="flex items-baseline gap-1 rounded-full border px-2 py-0.5 text-xs text-muted-foreground"
+                  >
+                    <span className="font-medium text-foreground">{lang.name}</span>
+                    {lang.level && <span className="text-[10px] opacity-70">{lang.level}</span>}
+                  </span>
+                ))}
+              </div>
+            </section>
+          );
+        }
+
         if (section.id === "projects" && data.projects.length > 0) {
           return (
             <section key="projects" className="space-y-3">

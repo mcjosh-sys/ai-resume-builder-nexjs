@@ -15,6 +15,7 @@ const SectionTypeMap: Record<string, $Enums.SectionType> = {
   education: "EDUCATION",
   experience: "WORK_EXPERIENCE",
   skills: "SKILLS",
+  languages: "LANGUAGE",
   header: "HEADER",
   projects: "PROJECT",
   certifications: "CERTIFICATION",
@@ -115,6 +116,11 @@ export function parseResume(resume: RawResume): EditorResume {
             date: parseDateInput(a.date),
           })),
         };
+        break;
+
+      case "LANGUAGE":
+        step = DEFAULT_STEPS.find((s) => s.id === "languages")!;
+        step.data = { languages: (resume?.languages as any) ?? [] };
         break;
 
       case "OTHER_FIELD":
@@ -243,6 +249,13 @@ export function compileResume(editorResume: EditorResume) {
           }),
         );
         break;
+      case "languages":
+        resumeData.languages = step.data?.languages.map(
+          ({ resumeId, id, ...language }: any) => ({
+            ...language,
+          }),
+        );
+        break;
       case "projects":
         resumeData.projects = step.data?.projects.map(
           ({ resumeId, id, ...project }: any) => ({
@@ -313,6 +326,7 @@ export function stepsToTemplateResume(steps: Step[]): TemplateResume {
   const experienceStep = steps.find((s) => s.id === "experience");
   const educationStep = steps.find((s) => s.id === "education");
   const skillsStep = steps.find((s) => s.id === "skills");
+  const languagesStep = steps.find((s) => s.id === "languages");
   const projectsStep = steps.find((s) => s.id === "projects");
   const certificationsStep = steps.find((s) => s.id === "certifications");
   const awardsStep = steps.find((s) => s.id === "awards");
@@ -362,6 +376,11 @@ export function stepsToTemplateResume(steps: Step[]): TemplateResume {
       name: s.name,
       level: s.level,
       category: s.category,
+    })),
+
+    languages: (languagesStep?.data?.languages ?? []).map((l: any) => ({
+      name: l.name,
+      level: l.level,
     })),
 
     projects: (projectsStep?.data?.projects ?? []).map((p: any) => ({

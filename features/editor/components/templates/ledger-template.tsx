@@ -152,6 +152,21 @@ export function LedgerTemplate({
             );
           }
 
+          if (section.id === "languages" && data.languages.length > 0) {
+            return (
+              <SectionRow key="languages" label="Languages">
+                <div className="space-y-0.5">
+                  {data.languages.map((lang, i) => (
+                    <p key={i} className="text-xs text-neutral-700">
+                      • <span className="font-medium">{lang.name}</span>
+                      {lang.level ? ` (${lang.level})` : ""}
+                    </p>
+                  ))}
+                </div>
+              </SectionRow>
+            );
+          }
+
           if (section.id === "projects" && data.projects.length > 0) {
             return (
               <SectionRow key="projects" label="Projects">

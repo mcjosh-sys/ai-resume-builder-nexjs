@@ -60,4 +60,11 @@ export const DEFAULT_STEPS: Step[] = [
     sidebarDesc: "Achievements & recognition",
     enabled: false,
   },
+  {
+    id: "languages",
+    title: "Languages",
+    icon: ICON_MAP.globe,
+    sidebarDesc: "Languages you speak",
+    enabled: false,
+  },
 ] as const;

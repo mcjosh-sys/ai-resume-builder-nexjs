@@ -146,6 +146,21 @@ export function VelvetTemplate({
             </section>
           );
         }
+        if (section.id === "languages" && data.languages.length > 0) {
+          return (
+            <section key="languages" className="space-y-2">
+              <VelvetSectionTitle label="Languages" accentClass={accentClass} />
+              <div className="flex flex-wrap justify-center gap-x-4 gap-y-1">
+                {data.languages.map((lang, i) => (
+                  <span key={i} className="text-xs text-neutral-600">
+                    <span className="font-medium">{lang.name}</span>
+                    {lang.level && <span className="text-[10px] opacity-70 ml-1">({lang.level})</span>}
+                  </span>
+                ))}
+              </div>
+            </section>
+          );
+        }
         if (section.id === "projects" && data.projects.length > 0) {
           return (
             <section key="projects" className="space-y-3">

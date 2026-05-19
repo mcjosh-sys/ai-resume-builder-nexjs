@@ -17,6 +17,7 @@ enum SectionType {
   PROJECT
   CERTIFICATION
   AWARD
+  LANGUAGE
 }
 
 enum BorderStyle {
@@ -36,6 +37,14 @@ enum SkillLevel {
   INTERMEDIATE
   ADVANCED
   EXPERT
+}
+
+enum LanguageLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  FLUENT
+  NATIVE
 }
 
 model Resume {
@@ -63,6 +72,7 @@ model Resume {
   otherFields     OtherField[]
   sections        Section[]
   skills          Skill[]
+  languages       Language[]
   projects        Project[]
   certifications  Certification[]
   awards          Award[]
@@ -167,6 +177,21 @@ model Skill {
   // @@unique([resumeId, name])
   @@index([resumeId])
   @@map("skills")
+}
+
+model Language {
+  id   String @id @default(cuid())
+  name String
+
+  level LanguageLevel @default(BEGINNER)
+
+  resumeId String
+  resume   Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+
+  order Int @default(0)
+
+  @@index([resumeId])
+  @@map("languages")
 }
 
 model OtherField {

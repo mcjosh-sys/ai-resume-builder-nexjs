@@ -141,6 +141,25 @@ export function EmberTemplate({ template, data }: ResumeTemplateRendererProps) {
           );
         }
 
+        if (section.id === "languages" && data.languages.length > 0) {
+          return (
+            <section key="languages" className="space-y-2">
+              <SectionTitle label="Languages" accent={template.accent} dark />
+              <div className="flex flex-wrap gap-1.5">
+                {data.languages.map((lang, i) => (
+                  <span
+                    key={i}
+                    className="flex items-baseline gap-1 rounded-full border border-neutral-800 px-2 py-0.5 text-xs text-neutral-700 print:border-neutral-300"
+                  >
+                    <span className="font-medium text-neutral-900 print:text-black">{lang.name}</span>
+                    {lang.level && <span className="text-[10px] opacity-70">{lang.level}</span>}
+                  </span>
+                ))}
+              </div>
+            </section>
+          );
+        }
+
         if (section.id === "certifications" && data.certifications.length > 0) {
           return (
             <section key="certifications" className="space-y-2">

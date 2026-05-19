@@ -66,6 +66,12 @@ export type Step = (
       };
     }
   | {
+      id: "languages";
+      data?: {
+        languages: Prettify<WithoutResume<Prisma.LanguageCreateInput>>[];
+      };
+    }
+  | {
       id: `other-field-${string}`;
       data?: Prettify<WithoutResume<Prisma.OtherFieldCreateInput>>;
     }
@@ -177,6 +183,13 @@ export type AwardSection = {
   };
 };
 
+export type LanguageSection = {
+  id: "languages";
+  data: {
+    languages: Prettify<WithoutResume<Prisma.LanguageCreateInput>>[];
+  };
+};
+
 export type ResumeSection =
   | HeaderSection
   | EducationSection
@@ -185,4 +198,5 @@ export type ResumeSection =
   | OtherFieldSection
   | ProjectSection
   | CertificationSection
-  | AwardSection;
+  | AwardSection
+  | LanguageSection;
