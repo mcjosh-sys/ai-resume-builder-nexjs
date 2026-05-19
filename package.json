@@ -4,12 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "bun run build:css && next dev --port 3600",
-    "build": "bun run build:css && next build",
+    "build": "bunx prisma generate && bunx prisma migrate deploy && bun run build:css && next build",
     "start": "next start",
     "lint": "eslint",
     "shadcn:add": "bunx shadcn@latest add",
-    "build:css": "bunx tailwindcss -i ./app/globals.css -o ./public/css/main.css --minify",
-    "postinstall": "bunx prisma generate"
+    "build:css": "bunx tailwindcss -i ./app/globals.css -o ./public/css/main.css --minify"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.36.5",
