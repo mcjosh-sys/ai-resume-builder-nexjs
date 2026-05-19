@@ -104,3 +104,29 @@ export function htmlToEditorState(html: string): Promise<string> {
     );
   });
 }
+
+export function isSerializedRichText(input: unknown): input is string {
+  if (typeof input !== "string" || input.trim() === "") return false;
+
+  try {
+    const parsed: unknown = JSON.parse(input);
+
+    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed))
+      return false;
+
+    const root = (parsed as Record<string, unknown>).root;
+
+    if (typeof root !== "object" || root === null || Array.isArray(root))
+      return false;
+
+    const r = root as Record<string, unknown>;
+
+    return (
+      r.type === "root" &&
+      typeof r.version === "number" &&
+      Array.isArray(r.children)
+    );
+  } catch {
+    return false;
+  }
+}

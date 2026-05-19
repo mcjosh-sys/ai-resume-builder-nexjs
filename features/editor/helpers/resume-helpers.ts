@@ -1,5 +1,7 @@
-import { editorStateToHtml } from "@/components/editor/utils/rich-text-conversions";
-import { isSerializedRichText } from "@/components/rich-text-renderer";
+import {
+  editorStateToHtml,
+  isSerializedRichText,
+} from "@/components/editor/utils/rich-text-conversions";
 import { AIResume } from "@/features/ai/prompts";
 import { RawResume } from "@/features/resume/actions/resume.actions";
 import { $Enums, Prisma } from "@/lib/generated/prisma";

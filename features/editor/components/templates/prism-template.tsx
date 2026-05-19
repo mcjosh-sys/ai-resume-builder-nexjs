@@ -62,7 +62,10 @@ export function PrismTemplate({ template, data }: ResumeTemplateRendererProps) {
                   Experience
                 </p>
                 {data.experience.map((item, i) => (
-                  <div key={i} className="grid grid-cols-[1fr_auto] gap-x-4">
+                  <div
+                    key={i}
+                    className="grid grid-cols-[1fr_auto] gap-x-4 break-inside-avoid"
+                  >
                     <div className="space-y-0.5">
                       <p className="text-sm font-bold">{item.position}</p>
                       <p className="text-xs text-muted-foreground">
@@ -146,7 +149,11 @@ export function PrismTemplate({ template, data }: ResumeTemplateRendererProps) {
                       )}
                     >
                       <span className="font-medium">{lang.name}</span>
-                      {lang.level && <span className="text-[10px] opacity-80">{lang.level}</span>}
+                      {lang.level && (
+                        <span className="text-[10px] opacity-80">
+                          {lang.level}
+                        </span>
+                      )}
                     </span>
                   ))}
                 </div>

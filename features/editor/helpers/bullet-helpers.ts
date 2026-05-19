@@ -1,5 +1,7 @@
-import { editorStateToHtml } from "@/components/editor/utils/rich-text-conversions";
-import { isSerializedRichText } from "@/components/rich-text-renderer";
+import {
+  editorStateToHtml,
+  isSerializedRichText,
+} from "@/components/editor/utils/rich-text-conversions";
 import { capitalizeFirst } from "@/lib/utils";
 
 export function isBullet(content: string): boolean {

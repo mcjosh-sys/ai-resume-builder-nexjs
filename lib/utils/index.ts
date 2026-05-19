@@ -1,5 +1,7 @@
 import { clsx, type ClassValue } from "clsx";
+import { NextResponse } from "next/server";
 import { twMerge } from "tailwind-merge";
+import { isAppError } from "../errors";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -105,6 +107,17 @@ export function normalizeString(s: string) {
     .replace(/[^\w\s]/g, "")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+export function handleRouteError(error: unknown) {
+  if (isAppError(error) && error.data?.status && error.data.status < 500) {
+    return NextResponse.json(
+      { error: error.message },
+      { status: error.data.status },
+    );
+  }
+  console.error("Error:", error);
+  return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
 }
 
 export * from "./ai.util";

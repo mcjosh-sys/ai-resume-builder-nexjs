@@ -1,5 +1,7 @@
-import { editorStateToHtml } from "@/components/editor/utils/rich-text-conversions";
-import { isSerializedRichText } from "@/components/rich-text-renderer";
+import {
+  editorStateToHtml,
+  isSerializedRichText,
+} from "@/components/editor/utils/rich-text-conversions";
 import { cn } from "@/lib/utils";
 import { ResumeTemplate } from "../../resource/templates";
 
@@ -172,14 +174,12 @@ export function RichText({
         <style
           dangerouslySetInnerHTML={{
             __html: `
-          .richtext-content ul {
-            list-style-type: disc;
-            padding-left: 1.5rem;
+          .richtext-content {
+            box-decoration-break: clone;
+            -webkit-box-decoration-break: clone;
           }
-          .richtext-content ol {
-            list-style-type: decimal;
-            padding-left: 1.5rem;
-          }
+          .richtext-content ul { list-style-type: disc; padding-left: 1.5rem; }
+          .richtext-content ol { list-style-type: decimal; padding-left: 1.5rem; }
         `,
           }}
         />
@@ -188,15 +188,25 @@ export function RichText({
             "richtext-content text-sm whitespace-pre-line",
             className,
           )}
-          dangerouslySetInnerHTML={{
-            __html: content,
-          }}
+          dangerouslySetInnerHTML={{ __html: content }}
         />
       </>
     );
   }
+
+  // For plain text, you might want the same behavior
   return (
-    <p className={cn("text-sm leading-relaxed whitespace-pre-line", className)}>
+    <p
+      className={cn(
+        "text-sm leading-relaxed whitespace-pre-line",
+        className,
+        "print-break-clone", // optional class
+      )}
+      style={{
+        boxDecorationBreak: "clone",
+        WebkitBoxDecorationBreak: "clone",
+      }}
+    >
       {content}
     </p>
   );
