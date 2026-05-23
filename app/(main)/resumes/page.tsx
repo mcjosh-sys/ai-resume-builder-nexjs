@@ -17,7 +17,7 @@ export default async function ResumesListPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Link
-              href="/resumes"
+              href="/dashboard"
               className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
             >
               <ChevronLeft className="size-3" />

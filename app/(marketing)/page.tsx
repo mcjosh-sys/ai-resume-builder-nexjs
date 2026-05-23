@@ -66,7 +66,7 @@ export default function LandingPage() {
           <div className="hidden sm:flex gap-2 items-center">
             <SignedIn>
               <Button asChild size="sm">
-                <Link href="/resumes">Dashboard</Link>
+                <Link href="/dashboard">Dashboard</Link>
               </Button>
             </SignedIn>
             <SignedOut>
@@ -88,7 +88,7 @@ export default function LandingPage() {
             <MobileMenuContent>
               <SignedIn>
                 <Button asChild className="w-full">
-                  <Link href="/resumes">Dashboard</Link>
+                  <Link href="/dashboard">Dashboard</Link>
                 </Button>
               </SignedIn>
               <SignedOut>
