@@ -23,10 +23,11 @@ import { useEffect, useState } from "react";
 import { AutocompleteNode } from "./editor/nodes/autocomplete-node";
 import { AutocompletePlugin } from "./editor/plugins/autocomplete-plugin";
 import { LinkPlugin } from "./editor/plugins/link-plugin";
-import { BlockFormatButtons } from "./editor/plugins/toolbar/block-format-btns-toolbar-plugin";
-import { FormatBulletedListButton } from "./editor/plugins/toolbar/block-format-btns/format-bulleted-list-btn";
-import { FormatNumberedListButton } from "./editor/plugins/toolbar/block-format-btns/format-numbered-list-btn";
-import { FormatParagraphButton } from "./editor/plugins/toolbar/block-format-btns/format-paragraph-btn";
+import { BlockFormatDropDown } from "./editor/plugins/toolbar/block-format-toolbar-plugin";
+import { FormatBulletedList } from "./editor/plugins/toolbar/block-format/format-bulleted-list";
+import { FormatHeading } from "./editor/plugins/toolbar/block-format/format-heading";
+import { FormatNumberedList } from "./editor/plugins/toolbar/block-format/format-numbered-list";
+import { FormatParagraph } from "./editor/plugins/toolbar/block-format/format-paragraph";
 import { FontFormatToolbarPlugin } from "./editor/plugins/toolbar/font-format-toolbar-plugin";
 import { LinkToolbarPlugin } from "./editor/plugins/toolbar/link-toolbar-plugin";
 import {
@@ -136,11 +137,17 @@ export function Plugins({
       <ToolbarPlugin>
         {({ blockType }) => (
           <div className="vertical-align-middle sticky top-0 z-10 flex gap-2 overflow-auto border-b p-1">
-            <BlockFormatButtons>
-              <FormatParagraphButton />
+            {/* <BlockFormatButtons>
               <FormatBulletedListButton />
               <FormatNumberedListButton />
-            </BlockFormatButtons>
+              <FormatParagraphButton />
+            </BlockFormatButtons> */}
+            <BlockFormatDropDown>
+              <FormatParagraph />
+              <FormatHeading levels={["h1", "h2", "h3"]} />
+              <FormatBulletedList />
+              <FormatNumberedList />
+            </BlockFormatDropDown>
             <FontFormatToolbarPlugin />
             {/* <FormatNumberedList />
             <FormatBulletedList /> */}

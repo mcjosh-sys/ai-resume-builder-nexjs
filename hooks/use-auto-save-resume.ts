@@ -30,7 +30,7 @@ export const useAutoSaveResume = ({
   jobDescription,
   atsScore,
 }: UseAutoSaveResumeProps) => {
-  const debouncedChangeId = useSimpleDebounce(changeId, { delay: 500 });
+  const debouncedChangeId = useSimpleDebounce(changeId, { delay: 1000 });
   const [state, setState] = useState({
     error: null as AppError | null,
     lastSaved: initialLastSaved,

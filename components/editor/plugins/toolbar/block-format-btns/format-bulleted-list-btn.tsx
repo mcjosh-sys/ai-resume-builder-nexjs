@@ -26,12 +26,14 @@ export function FormatBulletedListButton() {
   const formatBulletedList = () => {
     if (blockType !== BLOCK_FORMAT_VALUE) {
       activeEditor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined);
-    } else {
-      formatParagraph();
     }
   };
   return (
-    <BlockFormatButton value={BLOCK_FORMAT_VALUE} onFormat={formatBulletedList}>
+    <BlockFormatButton
+      value={BLOCK_FORMAT_VALUE}
+      onFormat={formatBulletedList}
+      disabled={blockType === BLOCK_FORMAT_VALUE}
+    >
       {blockTypeToBlockName[BLOCK_FORMAT_VALUE].icon}
     </BlockFormatButton>
   );

@@ -8,23 +8,26 @@ interface BlockFormatButtonProps {
   value: BlockTypeValue;
   onFormat?: () => void;
   children: React.ReactNode;
+  disabled?: boolean;
 }
 
 export function BlockFormatButton({
   value,
   children,
   onFormat,
+  disabled = false,
 }: BlockFormatButtonProps) {
   const { setBlockType, blockType } = useToolbarContext();
   const handleClick = () => {
     onFormat?.();
-    setBlockType(value === blockType ? "paragraph" : value);
+    // setBlockType(value === blockType ? "paragraph" : value);
   };
   return (
     <ToggleGroupItem
       value={value}
       aria-label={blockTypeToBlockName[value].label}
       onClick={handleClick}
+      disabled={disabled}
     >
       {children}
     </ToggleGroupItem>

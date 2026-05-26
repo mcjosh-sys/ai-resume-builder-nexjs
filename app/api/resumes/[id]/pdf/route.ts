@@ -5,6 +5,7 @@ import { ResumeTemplateRenderer } from "@/features/editor/components/resume-temp
 import { parseResumeToTemplateResume } from "@/features/editor/helpers/resume-helpers";
 import { getTemplateById } from "@/features/editor/resource/templates";
 import { getResume } from "@/features/resume/actions/resume.actions";
+import { runWithDom } from "@/lib/dom";
 import { renderReactToHtml } from "@/lib/pdf";
 import { handleRouteError } from "@/lib/utils";
 import { generatePdf } from "@/server/action/pdf.action";
@@ -25,24 +26,29 @@ export async function GET(
       return NextResponse.json({ error: "Resume not found" }, { status: 404 });
     }
 
+
     const resumeData = parseResumeToTemplateResume(resume);
     const templateData = getTemplateById(resume.template);
     const { renderToString } = await import("react-dom/server");
-    const content = renderToString(
-      createElement(
-        "div",
-        { className: "resume-preview-container" },
-        createElement(ResumeTemplateRenderer, {
-          template: templateData,
-          colorHex: resume.colorHex,
-          data: resumeData,
-        }),
-      ),
-    );
+
     const css = await fetch(`${env.NEXT_PUBLIC_APP_URL}/css/main.css`).then(
       (res) => res.text(),
     );
-    const html = renderReactToHtml(css, content);
+
+    const html = runWithDom(() => {
+      const content = renderToString(
+        createElement(
+          "div",
+          { className: "resume-preview-container" },
+          createElement(ResumeTemplateRenderer, {
+            template: templateData,
+            colorHex: resume.colorHex,
+            data: resumeData,
+          }),
+        ),
+      );
+      return renderReactToHtml(css, content);
+    })
 
     const blob = await generatePdf(html, !!templateData.noMargins);
 
