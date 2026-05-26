@@ -54,9 +54,9 @@ model Resume {
   description     String?
   photoUrl        String?
   colorHex        String           @default("default")
-  template      String           @default("aurora")
+  template        String           @default("aurora")
   borderStyle     BorderStyle      @default(SQUIRCLE)
-  atsScore        Int?              @default(0)
+  atsScore        Int?             @default(0)
   summary         String?
   firstName       String?
   lastName        String?
@@ -76,7 +76,6 @@ model Resume {
   projects        Project[]
   certifications  Certification[]
   awards          Award[]
-  
 
   isDeleted Boolean @default(false)
 
@@ -88,11 +87,11 @@ model Resume {
 }
 
 model Link {
-  id        String   @id @default(cuid())
-  name      String
-  url       String
-  resumeId  String
-  resume    Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  id       String @id @default(cuid())
+  name     String
+  url      String
+  resumeId String
+  resume   Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
 
   @@index([resumeId])
   @@map("links")
@@ -108,10 +107,10 @@ model Section {
   order       Int
 
   enabled Boolean @default(true)
-  icon String @default("star")
+  icon    String  @default("star")
 
-  title String
-  description String @default("")
+  title              String
+  description        String @default("")
   sidebarDescription String @default("")
 
   otherFieldId String?     @unique
@@ -144,7 +143,6 @@ model Education {
   degree      String?
   school      String?
   description String?
-  
 
   isCurrent Boolean   @default(false)
   startDate DateTime?
@@ -275,4 +273,46 @@ model Subscription {
 
   @@index([userId])
   @@map("user_subscriptions")
+}
+
+model APIKey {
+  id     String @id @default(cuid())
+  userId String
+
+  keyHash   String @unique
+  keyPrefix String @unique
+
+  name       String?
+  isActive   Boolean   @default(true)
+  lastUsedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  logs APIAccessLog[]
+
+  @@index([userId])
+  @@map("api_keys")
+}
+
+model APIAccessLog {
+  id       String @id @default(cuid())
+  apiKeyId String
+
+  endpoint   String
+  method     String
+  statusCode Int?
+  ipAddress  String?
+  userAgent  String?
+  durationMs Int?
+
+  timestamp DateTime @default(now())
+
+  apiKey APIKey @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
+
+  @@index([apiKeyId])
+  @@index([apiKeyId, timestamp])
+  @@index([timestamp])
+  @@index([endpoint])
+  @@map("api_access_logs")
 }
