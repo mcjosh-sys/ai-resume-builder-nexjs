@@ -11,6 +11,9 @@ import { PrismTemplate } from "./templates/prism-template";
 import { SageTemplate } from "./templates/sage-template";
 import { SlateTemplate } from "./templates/slate-template";
 import { VelvetTemplate } from "./templates/velvet-template";
+import { ChronicleTemplate } from "./templates/chronicle-template";
+import { SummitTemplate } from "./templates/summit-template";
+import { VanguardTemplate } from "./templates/vanguard-template";
 
 // Re-export all public types so existing imports keep working
 export type {
@@ -96,6 +99,15 @@ export function ResumeTemplateRenderer({
         </Case>
         <Case value="ledger">
           <LedgerTemplate template={template} data={data} />
+        </Case>
+        <Case value="chronicle">
+          <ChronicleTemplate template={template} data={data} />
+        </Case>
+        <Case value="summit">
+          <SummitTemplate template={template} data={data} />
+        </Case>
+        <Case value="vanguard">
+          <VanguardTemplate template={template} data={data} />
         </Case>
         <Default>
           <AuroraTemplate template={template} data={data} />

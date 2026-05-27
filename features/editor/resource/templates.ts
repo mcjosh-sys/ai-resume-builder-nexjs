@@ -143,6 +143,38 @@ export const RESUME_TEMPLATES = Object.freeze([
       subtitle: "Perfect for engineering and science roles",
     },
   } as const,
+  {
+    id: "chronicle",
+    name: "Chronicle",
+    supportsPhoto: true,
+    description: "Modern timeline layout with a vertical spine and rounded photo.",
+    accent: "bg-teal-600",
+    preview: {
+      title: "Modern timeline",
+      subtitle: "Highly visual and recruiter-friendly layout",
+    },
+  } as const,
+  {
+    id: "summit",
+    name: "Summit",
+    description: "Clean corporate layout with right-aligned dates and structured grid columns.",
+    accent: "bg-slate-700",
+    preview: {
+      title: "Corporate minimalist",
+      subtitle: "Professional layout ideal for finance and accounting",
+    },
+  } as const,
+  {
+    id: "vanguard",
+    name: "Vanguard",
+    supportsPhoto: true,
+    description: "Bold executive layout with thick dividers and bottom-border skill tags.",
+    accent: "bg-blue-600",
+    preview: {
+      title: "Executive Accent",
+      subtitle: "Premium look for leaders and managers",
+    },
+  } as const,
 ]);
 
 export type TemplateId =
@@ -157,7 +189,10 @@ export type TemplateId =
   | "banner"
   | "canvas"
   | "focal"
-  | "ledger";
+  | "ledger"
+  | "chronicle"
+  | "summit"
+  | "vanguard";
 
 export function getTemplateById(id: any) {
   return RESUME_TEMPLATES.find((item) => item.id === id) ?? RESUME_TEMPLATES[0];
