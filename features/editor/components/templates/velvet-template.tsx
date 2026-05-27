@@ -41,9 +41,9 @@ export function VelvetTemplate({
             {fullName}
           </p>
         )}
-        {data.jobTitle && (
+        {data.jobTitle?.length && (
           <p className="text-xs tracking-[0.2em] uppercase text-muted-foreground">
-            {data.jobTitle}
+            {data.jobTitle?.join?.(" · ")}
           </p>
         )}
         {/* Decorative line */}
@@ -154,7 +154,11 @@ export function VelvetTemplate({
                 {data.languages.map((lang, i) => (
                   <span key={i} className="text-xs text-neutral-600">
                     <span className="font-medium">{lang.name}</span>
-                    {lang.level && <span className="text-[10px] opacity-70 ml-1">({lang.level})</span>}
+                    {lang.level && (
+                      <span className="text-[10px] opacity-70 ml-1">
+                        ({lang.level})
+                      </span>
+                    )}
                   </span>
                 ))}
               </div>

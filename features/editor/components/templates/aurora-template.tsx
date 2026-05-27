@@ -18,8 +18,10 @@ export function AuroraTemplate({
       {/* Header is always first */}
       <header className="space-y-1">
         {fullName && <p className="text-2xl font-semibold">{fullName}</p>}
-        {data.jobTitle && (
-          <p className="text-sm text-muted-foreground">{data.jobTitle}</p>
+        {data.jobTitle?.length && (
+          <p className="text-sm text-muted-foreground">
+            {data.jobTitle?.join?.(" · ")}
+          </p>
         )}
         <ContactLine data={data} />
       </header>
@@ -112,8 +114,14 @@ export function AuroraTemplate({
                     key={i}
                     className="flex items-baseline gap-1 rounded-full border px-2 py-0.5 text-xs text-muted-foreground"
                   >
-                    <span className="font-medium text-foreground">{lang.name}</span>
-                    {lang.level && <span className="text-[10px] opacity-70">{lang.level}</span>}
+                    <span className="font-medium text-foreground">
+                      {lang.name}
+                    </span>
+                    {lang.level && (
+                      <span className="text-[10px] opacity-70">
+                        {lang.level}
+                      </span>
+                    )}
                   </span>
                 ))}
               </div>

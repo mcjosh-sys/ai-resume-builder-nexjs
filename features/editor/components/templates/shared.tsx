@@ -95,7 +95,7 @@ export type TemplateResume = {
   photoUrl?: string;
   firstName?: string;
   lastName?: string;
-  jobTitle?: string;
+  jobTitle?: string[];
   email?: string;
   phone?: string;
   city?: string;

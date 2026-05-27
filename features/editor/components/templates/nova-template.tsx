@@ -29,8 +29,10 @@ export function NovaTemplate({ template, data }: ResumeTemplateRendererProps) {
         {fullName && (
           <div>
             <p className="text-lg font-bold leading-tight">{fullName}</p>
-            {data.jobTitle && (
-              <p className="text-xs text-neutral-300 mt-0.5">{data.jobTitle}</p>
+            {data.jobTitle?.length && (
+              <p className="text-xs text-neutral-300 mt-0.5">
+                {data.jobTitle?.join?.(" · ")}
+              </p>
             )}
           </div>
         )}
@@ -96,7 +98,11 @@ export function NovaTemplate({ template, data }: ResumeTemplateRendererProps) {
                   />
                   <span className="text-xs text-neutral-200 flex items-baseline gap-1">
                     <span className="font-medium">{lang.name}</span>
-                    {lang.level && <span className="text-[10px] opacity-70">({lang.level})</span>}
+                    {lang.level && (
+                      <span className="text-[10px] opacity-70">
+                        ({lang.level})
+                      </span>
+                    )}
                   </span>
                 </div>
               ))}

@@ -16,7 +16,7 @@ export type RawResume = {
   template?: string;
   title?: string | null;
   summary?: string | null;
-  jobTitle?: string | null;
+  jobTitle?: string[];
   city?: string | null;
   country?: string | null;
   phone?: string | null;

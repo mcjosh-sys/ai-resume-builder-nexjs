@@ -60,7 +60,7 @@ model Resume {
   summary         String?
   firstName       String?
   lastName        String?
-  jobTitle        String?
+  jobTitle        String[]         @default([])
   jobDescription  String?
   city            String?
   country         String?

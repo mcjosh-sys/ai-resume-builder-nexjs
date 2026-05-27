@@ -66,7 +66,9 @@ export function SageTemplate({ template, data }: ResumeTemplateRendererProps) {
                 className="flex items-baseline gap-1 rounded-full bg-muted px-2 py-0.5 text-xs"
               >
                 <span className="font-medium">{lang.name}</span>
-                {lang.level && <span className="text-[10px] opacity-70">({lang.level})</span>}
+                {lang.level && (
+                  <span className="text-[10px] opacity-70">({lang.level})</span>
+                )}
               </span>
             ))}
           </div>
@@ -215,9 +217,9 @@ export function SageTemplate({ template, data }: ResumeTemplateRendererProps) {
       <header className="space-y-2 border-b pb-4">
         {fullName && <p className="text-2xl font-semibold">{fullName}</p>}
         <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-          {data.jobTitle && (
+          {data.jobTitle?.length && (
             <span className="rounded-full border px-2 py-0.5">
-              {data.jobTitle}
+              {data.jobTitle?.join?.(" · ")}
             </span>
           )}
           {location(data.city, data.country) && (

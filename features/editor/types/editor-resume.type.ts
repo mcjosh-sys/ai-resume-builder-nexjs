@@ -4,77 +4,77 @@ import { ComponentType } from "react";
 
 export type Step = (
   | {
-      id: "header";
-      data?: {
-        photo?: File | null;
-        photoUrl?: string | undefined;
-        summary?: string | undefined;
-        jobTitle?: string | undefined;
-        firstName?: string | undefined;
-        lastName?: string | undefined;
-        city?: string | undefined;
-        country?: string | undefined;
-        phone?: string | undefined;
-        email?: string | undefined;
-        links?: Prettify<WithoutResume<Prisma.LinkCreateInput>>[];
-      };
-    }
+    id: "header";
+    data?: {
+      photo?: File | null;
+      photoUrl?: string
+      summary?: string
+      jobTitle?: string[];
+      firstName?: string
+      lastName?: string
+      city?: string
+      country?: string
+      phone?: string
+      email?: string
+      links?: Prettify<WithoutResume<Prisma.LinkCreateInput>>[];
+    };
+  }
   | {
-      id: "summary";
-      data?: {
-        summary?: string | undefined;
-      };
-    }
+    id: "summary";
+    data?: {
+      summary?: string;
+    };
+  }
   | {
-      id: "education";
-      data?: {
-        educations: Prettify<WithoutResume<Prisma.EducationCreateInput>>[];
-      };
-    }
+    id: "education";
+    data?: {
+      educations: Prettify<WithoutResume<Prisma.EducationCreateInput>>[];
+    };
+  }
   | {
-      id: "experience";
-      data?: {
-        workExperiences: Prettify<
-          WithoutResume<Prisma.WorkExperienceCreateInput>
-        >[];
-      };
-    }
+    id: "experience";
+    data?: {
+      workExperiences: Prettify<
+        WithoutResume<Prisma.WorkExperienceCreateInput>
+      >[];
+    };
+  }
   | {
-      id: "skills";
-      data?: {
-        skills: Prettify<WithoutResume<Prisma.SkillCreateInput>>[];
-      };
-    }
+    id: "skills";
+    data?: {
+      skills: Prettify<WithoutResume<Prisma.SkillCreateInput>>[];
+    };
+  }
   | {
-      id: "projects";
-      data?: {
-        projects: Prettify<WithoutResume<Prisma.ProjectCreateInput>>[];
-      };
-    }
+    id: "projects";
+    data?: {
+      projects: Prettify<WithoutResume<Prisma.ProjectCreateInput>>[];
+    };
+  }
   | {
-      id: "certifications";
-      data?: {
-        certifications: Prettify<
-          WithoutResume<Prisma.CertificationCreateInput>
-        >[];
-      };
-    }
+    id: "certifications";
+    data?: {
+      certifications: Prettify<
+        WithoutResume<Prisma.CertificationCreateInput>
+      >[];
+    };
+  }
   | {
-      id: "awards";
-      data?: {
-        awards: Prettify<WithoutResume<Prisma.AwardCreateInput>>[];
-      };
-    }
+    id: "awards";
+    data?: {
+      awards: Prettify<WithoutResume<Prisma.AwardCreateInput>>[];
+    };
+  }
   | {
-      id: "languages";
-      data?: {
-        languages: Prettify<WithoutResume<Prisma.LanguageCreateInput>>[];
-      };
-    }
+    id: "languages";
+    data?: {
+      languages: Prettify<WithoutResume<Prisma.LanguageCreateInput>>[];
+    };
+  }
   | {
-      id: `other-field-${string}`;
-      data?: Prettify<WithoutResume<Prisma.OtherFieldCreateInput>>;
-    }
+    id: `other-field-${string}`;
+    data?: Prettify<WithoutResume<Prisma.OtherFieldCreateInput>>;
+  }
 ) & {
   title: string;
   icon?: {
@@ -88,8 +88,8 @@ export type Step = (
 
 type StepById<ID extends Step["id"] | "other-fields"> =
   ID extends "other-fields"
-    ? OtherFieldStep
-    : Extract<Step, { id: Exclude<ID, "other-fields"> }>;
+  ? OtherFieldStep
+  : Extract<Step, { id: Exclude<ID, "other-fields"> }>;
 export type OtherFieldStep = Extract<Step, { id: `other-field-${string}` }>;
 export type OtherFieldData = NonNullable<OtherFieldStep["data"]>;
 

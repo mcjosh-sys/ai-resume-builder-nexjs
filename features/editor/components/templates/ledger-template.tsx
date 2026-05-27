@@ -48,8 +48,10 @@ export function LedgerTemplate({
           {fullName && (
             <p className="text-xl font-bold text-neutral-900">{fullName}</p>
           )}
-          {data.jobTitle && (
-            <p className="text-xs text-neutral-500">{data.jobTitle}</p>
+          {data.jobTitle?.length && (
+            <p className="text-xs text-neutral-500">
+              {data.jobTitle?.join?.(" | ")}
+            </p>
           )}
         </div>
         {contactParts.length > 0 && (

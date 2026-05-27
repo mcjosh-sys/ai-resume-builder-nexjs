@@ -38,7 +38,7 @@ export function AxisTemplate({ template, data }: ResumeTemplateRendererProps) {
             {fullName}
           </p>
         )}
-        {data.jobTitle && (
+        {data.jobTitle?.length && (
           <div className="flex items-center gap-2">
             <div className={cn("h-0.5 w-8 rounded", accentBg)} />
             <p
@@ -47,7 +47,7 @@ export function AxisTemplate({ template, data }: ResumeTemplateRendererProps) {
                 accentBg.replace("bg-", "text-"),
               )}
             >
-              {data.jobTitle}
+              {data.jobTitle?.join?.(" · ")}
             </p>
           </div>
         )}
@@ -102,7 +102,11 @@ export function AxisTemplate({ template, data }: ResumeTemplateRendererProps) {
                     className="flex items-baseline gap-1 rounded border border-neutral-300 px-2 py-0.5 text-xs text-neutral-700"
                   >
                     <span className="font-medium">{lang.name}</span>
-                    {lang.level && <span className="text-[10px] opacity-70">{lang.level}</span>}
+                    {lang.level && (
+                      <span className="text-[10px] opacity-70">
+                        {lang.level}
+                      </span>
+                    )}
                   </span>
                 ))}
               </div>

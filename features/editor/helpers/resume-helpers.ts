@@ -36,7 +36,7 @@ export function parseResume(resume: RawResume): EditorResume {
     summary: resume?.summary ?? "",
   };
   headerStep.data = {
-    jobTitle: resume?.jobTitle ?? "",
+    jobTitle: resume?.jobTitle ?? [],
     firstName: resume?.firstName ?? "",
     lastName: resume?.lastName ?? "",
     city: resume?.city ?? "",

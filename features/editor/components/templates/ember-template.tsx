@@ -17,9 +17,9 @@ export function EmberTemplate({ template, data }: ResumeTemplateRendererProps) {
         <div className="flex items-start justify-between gap-4">
           <div>
             {fullName && <p className="text-2xl font-semibold">{fullName}</p>}
-            {data.jobTitle && (
+            {data.jobTitle?.length && (
               <p className="text-sm text-neutral-300 print:text-neutral-600">
-                {data.jobTitle}
+                {data.jobTitle?.join?.(" · ")}
               </p>
             )}
             <p className="text-xs text-neutral-400 print:text-neutral-500">
@@ -151,8 +151,14 @@ export function EmberTemplate({ template, data }: ResumeTemplateRendererProps) {
                     key={i}
                     className="flex items-baseline gap-1 rounded-full border border-neutral-800 px-2 py-0.5 text-xs text-neutral-700 print:border-neutral-300"
                   >
-                    <span className="font-medium text-neutral-900 print:text-black">{lang.name}</span>
-                    {lang.level && <span className="text-[10px] opacity-70">{lang.level}</span>}
+                    <span className="font-medium text-neutral-900 print:text-black">
+                      {lang.name}
+                    </span>
+                    {lang.level && (
+                      <span className="text-[10px] opacity-70">
+                        {lang.level}
+                      </span>
+                    )}
                   </span>
                 ))}
               </div>

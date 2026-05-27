@@ -53,9 +53,9 @@ export function FocalTemplate({ template, data }: ResumeTemplateRendererProps) {
             {fullName}
           </p>
         )}
-        {data.jobTitle && (
+        {data.jobTitle?.length && (
           <p className="text-xs text-center text-neutral-500 mt-0.5">
-            {data.jobTitle}
+            {data.jobTitle?.join?.(" | ")}
           </p>
         )}
 
@@ -145,7 +145,11 @@ export function FocalTemplate({ template, data }: ResumeTemplateRendererProps) {
                         )}
                       >
                         <span className="font-semibold">{lang.name}</span>
-                        {lang.level && <span className="opacity-70 text-[8px]">{lang.level}</span>}
+                        {lang.level && (
+                          <span className="opacity-70 text-[8px]">
+                            {lang.level}
+                          </span>
+                        )}
                       </span>
                     ))}
                   </div>

@@ -18,9 +18,9 @@ export function PrismTemplate({ template, data }: ResumeTemplateRendererProps) {
         {fullName && (
           <p className="text-2xl font-extrabold tracking-tight">{fullName}</p>
         )}
-        {data.jobTitle && (
+        {data.jobTitle?.length && (
           <p className="text-sm font-medium opacity-90 mt-0.5">
-            {data.jobTitle}
+            {data.jobTitle?.join?.(" · ")}
           </p>
         )}
       </div>

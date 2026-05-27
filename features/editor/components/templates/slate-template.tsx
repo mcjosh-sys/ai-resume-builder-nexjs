@@ -16,8 +16,10 @@ export function SlateTemplate({ template, data }: ResumeTemplateRendererProps) {
         {fullName && (
           <p className="text-2xl font-bold tracking-tight">{fullName}</p>
         )}
-        {data.jobTitle && (
-          <p className="text-sm text-neutral-600">{data.jobTitle}</p>
+        {data.jobTitle?.length && (
+          <p className="text-sm text-neutral-600">
+            {data.jobTitle?.join?.(" | ")}
+          </p>
         )}
         <p className="text-xs text-neutral-500">
           {[
@@ -127,7 +129,9 @@ export function SlateTemplate({ template, data }: ResumeTemplateRendererProps) {
                 Languages
               </p>
               <p className="text-xs text-neutral-700">
-                {data.languages.map((l) => `${l.name}${l.level ? ` (${l.level})` : ""}`).join(" · ")}
+                {data.languages
+                  .map((l) => `${l.name}${l.level ? ` (${l.level})` : ""}`)
+                  .join(" · ")}
               </p>
             </section>
           );

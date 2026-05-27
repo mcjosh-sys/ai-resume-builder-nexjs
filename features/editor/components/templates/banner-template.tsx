@@ -6,11 +6,7 @@ import {
   type ResumeTemplateRendererProps,
 } from "./shared";
 
-function SidebarHeading({
-  label,
-}: {
-  label: string;
-}) {
+function SidebarHeading({ label }: { label: string }) {
   return (
     <div className="mb-1.5">
       <p className="text-[10px] font-bold uppercase tracking-widest text-white text-opacity-90">
@@ -24,7 +20,12 @@ function SidebarHeading({
 function MainHeading({ label, accent }: { label: string; accent: string }) {
   return (
     <div className="mb-2">
-      <p className={cn("text-xs font-bold uppercase tracking-widest", accent.replace("bg-", "text-"))}>
+      <p
+        className={cn(
+          "text-xs font-bold uppercase tracking-widest",
+          accent.replace("bg-", "text-"),
+        )}
+      >
         {label}
       </p>
       <hr className={cn("mt-0.5 border-t", accent.replace("bg-", "border-"))} />
@@ -41,7 +42,9 @@ export function BannerTemplate({
   const accentLight = accentBg.replace(/bg-([a-z]+)-\d+/, "bg-$1-50");
 
   const hasSidebar = data.sections.some((s) =>
-    ["education", "skills", "certifications", "awards", "languages"].includes(s.id),
+    ["education", "skills", "certifications", "awards", "languages"].includes(
+      s.id,
+    ),
   );
 
   return (
@@ -56,15 +59,13 @@ export function BannerTemplate({
             {fullName}
           </p>
         )}
-        {data.jobTitle && (
-          <p className="text-xs text-neutral-500 mt-0.5">{data.jobTitle}</p>
+        {data.jobTitle?.length && (
+          <p className="text-xs text-neutral-500 mt-0.5">
+            {data.jobTitle?.join?.(" · ")}
+          </p>
         )}
         <p className="text-xs text-neutral-400 mt-1">
-          {[
-            location(data.city, data.country),
-            data.email,
-            data.phone,
-          ]
+          {[location(data.city, data.country), data.email, data.phone]
             .filter(Boolean)
             .join("  ·  ")}
         </p>
@@ -74,7 +75,12 @@ export function BannerTemplate({
       <div className="flex flex-1">
         {/* Left sidebar – solid accent background */}
         {hasSidebar && (
-          <aside className={cn("w-[36%] shrink-0 p-4 space-y-4 text-white", accentBg)}>
+          <aside
+            className={cn(
+              "w-[36%] shrink-0 p-4 space-y-4 text-white",
+              accentBg,
+            )}
+          >
             {/* Contact */}
             <div className="space-y-1">
               <SidebarHeading label="Contact" />
@@ -115,14 +121,23 @@ export function BannerTemplate({
                     {data.education.map((item, i) => (
                       <div key={i} className="space-y-0.5">
                         <p className="text-[10px] text-white opacity-70">
-                          {dateRange(item.startDate, item.endDate, item.isCurrent)}
+                          {dateRange(
+                            item.startDate,
+                            item.endDate,
+                            item.isCurrent,
+                          )}
                         </p>
                         <p className="text-xs font-semibold text-white">
                           {item.school}
                         </p>
-                        <p className="text-xs text-white opacity-80">{item.degree}</p>
+                        <p className="text-xs text-white opacity-80">
+                          {item.degree}
+                        </p>
                         {item.description && (
-                          <RichText html={item.description} className="text-xs text-white" />
+                          <RichText
+                            html={item.description}
+                            className="text-xs text-white"
+                          />
                         )}
                       </div>
                     ))}
@@ -135,7 +150,10 @@ export function BannerTemplate({
                   <div key="skills" className="space-y-1.5">
                     <SidebarHeading label="Skills" />
                     {data.skills.map((skill, i) => (
-                      <p key={i} className="text-xs text-white flex items-start gap-1.5">
+                      <p
+                        key={i}
+                        className="text-xs text-white flex items-start gap-1.5"
+                      >
                         <span className="mt-0.5 h-1.5 w-1.5 rounded-sm bg-white opacity-70 shrink-0" />
                         {skill.name}
                       </p>
@@ -149,11 +167,18 @@ export function BannerTemplate({
                   <div key="languages" className="space-y-1.5">
                     <SidebarHeading label="Languages" />
                     {data.languages.map((lang, i) => (
-                      <p key={i} className="text-xs text-white flex items-start gap-1.5">
+                      <p
+                        key={i}
+                        className="text-xs text-white flex items-start gap-1.5"
+                      >
                         <span className="mt-0.5 h-1.5 w-1.5 rounded-sm bg-white opacity-70 shrink-0" />
                         <span>
                           <span className="font-medium">{lang.name}</span>
-                          {lang.level && <span className="ml-1 opacity-70">({lang.level})</span>}
+                          {lang.level && (
+                            <span className="ml-1 opacity-70">
+                              ({lang.level})
+                            </span>
+                          )}
                         </span>
                       </p>
                     ))}
@@ -161,12 +186,18 @@ export function BannerTemplate({
                 );
               }
 
-              if (section.id === "certifications" && data.certifications.length > 0) {
+              if (
+                section.id === "certifications" &&
+                data.certifications.length > 0
+              ) {
                 return (
                   <div key="certifications" className="space-y-1">
                     <SidebarHeading label="Certifications" />
                     {data.certifications.map((item, i) => (
-                      <p key={i} className="text-xs text-white flex items-start gap-1.5">
+                      <p
+                        key={i}
+                        className="text-xs text-white flex items-start gap-1.5"
+                      >
                         <span className="mt-0.5 h-1.5 w-1.5 rounded-sm bg-white opacity-70 shrink-0" />
                         {item.name}
                       </p>
@@ -185,7 +216,9 @@ export function BannerTemplate({
                           {item.title}
                         </p>
                         {item.issuer && (
-                          <p className="text-xs text-white opacity-70">{item.issuer}</p>
+                          <p className="text-xs text-white opacity-70">
+                            {item.issuer}
+                          </p>
                         )}
                       </div>
                     ))}
@@ -195,20 +228,25 @@ export function BannerTemplate({
 
               if (section.id.startsWith("other-field-")) {
                 const otherFieldId = section.id.replace("other-field-", "");
-                const fieldData = data.otherFields?.find((f) => f.id === otherFieldId);
+                const fieldData = data.otherFields?.find(
+                  (f) => f.id === otherFieldId,
+                );
                 if (!fieldData) return null;
                 return (
                   <div key={section.id} className="space-y-1">
-                    <SidebarHeading
-                      label={(section as any).title}
-                    />
+                    <SidebarHeading label={(section as any).title} />
                     <p className="text-xs font-semibold text-white">
                       {fieldData.title}
                     </p>
                     {fieldData.subtitle && (
-                      <p className="text-xs text-white opacity-70">{fieldData.subtitle}</p>
+                      <p className="text-xs text-white opacity-70">
+                        {fieldData.subtitle}
+                      </p>
                     )}
-                    <RichText html={fieldData.description} className="text-xs text-white" />
+                    <RichText
+                      html={fieldData.description}
+                      className="text-xs text-white"
+                    />
                   </div>
                 );
               }
@@ -230,10 +268,7 @@ export function BannerTemplate({
               );
             }
 
-            if (
-              section.id === "experience" &&
-              data.experience.length > 0
-            ) {
+            if (section.id === "experience" && data.experience.length > 0) {
               return (
                 <section key="experience" className="space-y-3">
                   <MainHeading label="Work Experience" accent={accentBg} />
@@ -244,7 +279,11 @@ export function BannerTemplate({
                           {item.company}
                         </p>
                         <span className="shrink-0 text-xs text-neutral-500">
-                          {dateRange(item.startDate, item.endDate, item.isCurrent)}
+                          {dateRange(
+                            item.startDate,
+                            item.endDate,
+                            item.isCurrent,
+                          )}
                         </span>
                       </div>
                       <p className="text-xs text-neutral-500 italic">
@@ -286,9 +325,13 @@ export function BannerTemplate({
 
             // Sidebar sections handled in the sidebar column
             if (
-              ["education", "skills", "certifications", "awards", "languages"].includes(
-                section.id,
-              )
+              [
+                "education",
+                "skills",
+                "certifications",
+                "awards",
+                "languages",
+              ].includes(section.id)
             ) {
               return null;
             }
