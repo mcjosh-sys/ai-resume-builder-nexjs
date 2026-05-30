@@ -202,10 +202,6 @@ export function RichText({
         className,
         "print-break-clone", // optional class
       )}
-      style={{
-        boxDecorationBreak: "clone",
-        WebkitBoxDecorationBreak: "clone",
-      }}
     >
       {content}
     </p>

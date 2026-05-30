@@ -56,7 +56,7 @@ export async function GET(
     headers.set("Content-Type", "application/pdf");
     headers.set(
       "Content-Disposition",
-      `attachment; filename="${resume.firstName} ${resume.lastName} - ${resume.jobTitle || "Resume"}.pdf"`,
+      `attachment; filename="${resume.firstName} ${resume.lastName} - ${resume.jobTitle?.join?.("_") || "Resume"}.pdf"`,
     );
     return new NextResponse(blob, { headers });
   } catch (error) {

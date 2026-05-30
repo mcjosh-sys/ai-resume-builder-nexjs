@@ -115,7 +115,7 @@ export function DownloadPdfButton({
 
       // Convert response to a blob and trigger browser download
       const blob = await response.blob();
-      const filename = `${templateData.resume.firstName} ${templateData.resume.lastName} - ${templateData.resume.jobTitle || "Resume"}.pdf`;
+      const filename = `${templateData.resume.firstName} ${templateData.resume.lastName} - ${templateData.resume.jobTitle?.join?.("_") || "Resume"}.pdf`;
       downalodObject(filename, blob);
 
       toast.success("Your PDF has been downloaded successfully.");
