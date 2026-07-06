@@ -39,6 +39,36 @@ export default function EditorProvider({ children }: BaseProps) {
     }
   }, [resume.error]);
 
+  // Global keyboard shortcut: Cmd/Ctrl+Z → undo, Cmd/Ctrl+Shift+Z → redo
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const isMac = navigator.platform.toUpperCase().includes("MAC");
+      const modifier = isMac ? e.metaKey : e.ctrlKey;
+      if (!modifier) return;
+
+      // Skip if focus is inside a rich-text area (let Lexical handle its own undo)
+      const target = e.target as HTMLElement;
+      const isEditable =
+        target.isContentEditable ||
+        target.tagName === "TEXTAREA" ||
+        target.tagName === "INPUT";
+      if (isEditable) return;
+
+      if (e.key === "z" || e.key === "Z") {
+        if (e.shiftKey) {
+          e.preventDefault();
+          resume.redo();
+        } else {
+          e.preventDefault();
+          resume.undo();
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [resume.undo, resume.redo]);
+
   if (resume.isLoading) {
     return (
       <div className="h-full w-full flex items-center justify-center text-primary">
@@ -145,6 +175,12 @@ export default function EditorProvider({ children }: BaseProps) {
           hasUnsavedChanges: resume.hasUnsavedChanges,
           currentResumeId: resume.currentResumeId,
           save: resume.save,
+        },
+        history: {
+          canUndo: resume.canUndo,
+          canRedo: resume.canRedo,
+          undo: resume.undo,
+          redo: resume.redo,
         },
         updateSection: resume.updateSection,
         setSteps: resume.setSteps,

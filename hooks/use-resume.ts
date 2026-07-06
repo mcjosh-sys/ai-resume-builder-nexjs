@@ -8,6 +8,7 @@ import { AppError } from "@/lib/errors";
 import { createId } from "@paralleldrive/cuid2";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAutoSaveResume } from "./use-auto-save-resume";
+import { useHistory } from "./use-history";
 import useUnloadWarning from "./use-unload-warning";
 
 export type ResumeMetadata = {
@@ -17,6 +18,12 @@ export type ResumeMetadata = {
   template: string;
 };
 
+/** The portion of resume state that participates in undo/redo history */
+type HistoricalState = {
+  steps: Step[];
+  metadata: ResumeMetadata;
+};
+
 export const useResume = ({
   resumeId,
   defaultSteps = DEFAULT_STEPS,
@@ -24,22 +31,42 @@ export const useResume = ({
   resumeId?: string | null;
   defaultSteps?: Step[];
 } = {}) => {
-  const [state, setState] = useState({
+  // Non-historical state (loading flags, error, ids, etc.)
+  const [meta, setMeta] = useState({
     updatedAt: null as Date | null,
     isLoading: false,
     error: null as AppError | null,
     loaded: false,
+    changeId: null as string | null,
+    currentResumeId: resumeId as string | null | undefined,
+  });
+
+  // Historical state — steps + metadata participate in undo/redo.
+  // Destructure stable function refs directly to avoid capturing the plain
+  // history object (which is recreated every render) in useCallback deps.
+  const {
+    present,
+    push: pushHistory,
+    replace: replaceHistory,
+    reset: resetHistory,
+    undo: historyUndo,
+    redo: historyRedo,
+    canUndo,
+    canRedo,
+  } = useHistory<HistoricalState>({
     steps: defaultSteps,
     metadata: {
       jobDescription: "",
-      atsScore: null as number | null,
+      atsScore: null,
       colorHex: "default",
       template: "aurora",
     },
-    changeId: null as string | null,
-    currentResumeId: resumeId,
   });
+
+  const { steps, metadata } = present;
+
   const isFreshResumeRef = useRef(true);
+  const isMountedRef = useRef(true);
 
   const {
     currentResumeId: savedResumeId,
@@ -50,21 +77,20 @@ export const useResume = ({
     save,
   } = useAutoSaveResume({
     resumeId,
-    steps: state.steps,
-    changeId: state.changeId,
-    template: state.metadata.template,
-    colorHex: state.metadata.colorHex,
-    jobDescription: state.metadata.jobDescription,
-    atsScore: state.metadata.atsScore,
-    lastSaved: state.updatedAt,
+    steps,
+    changeId: meta.changeId,
+    template: metadata.template,
+    colorHex: metadata.colorHex,
+    jobDescription: metadata.jobDescription,
+    atsScore: metadata.atsScore,
+    lastSaved: meta.updatedAt,
   });
 
   useEffect(() => {
-    if (error || state.error || savedResumeId === state.currentResumeId) return;
-    setState((prev) => ({ ...prev, currentResumeId: savedResumeId }));
-  }, [savedResumeId, state.currentResumeId, error, state.error]);
+    if (error || meta.error || savedResumeId === meta.currentResumeId) return;
+    setMeta((prev) => ({ ...prev, currentResumeId: savedResumeId }));
+  }, [savedResumeId, meta.currentResumeId, error, meta.error]);
 
-  const isMountedRef = useRef(true);
   useUnloadWarning(hasUnsavedChanges || isSaving);
 
   useEffect(() => {
@@ -75,22 +101,24 @@ export const useResume = ({
   }, []);
 
   useEffect(() => {
-    if (state.loaded) {
+    if (meta.loaded) {
       isFreshResumeRef.current = false;
     }
-  }, [state.loaded]);
+  }, [meta.loaded]);
 
   useEffect(() => {
     if (!resumeId) return;
 
     const fetchResume = async () => {
-      setState((prev) => ({
+      setMeta((prev) => ({
         ...prev,
         isLoading: true,
         error: null,
         updatedAt: null,
-        steps: defaultSteps,
       }));
+
+      // Reset historical state to defaults while loading
+      replaceHistory((current) => ({ steps: defaultSteps, metadata: current.metadata }));
 
       try {
         const rawResume = await getResume(resumeId);
@@ -103,59 +131,70 @@ export const useResume = ({
 
         const parsedResume = parseResume(rawResume);
 
-        setState((prev) => ({
-          ...prev,
-          updatedAt: rawResume?.updatedAt,
+        // Reset history with the freshly loaded state (no undo across loads)
+        resetHistory({
           steps: parsedResume.steps,
           metadata: {
-            ...prev.metadata,
             template: parsedResume.metadata.template,
             colorHex: parsedResume.metadata.colorHex,
             jobDescription: parsedResume.metadata.jobDescription,
             atsScore: parsedResume.metadata.atsScore,
           },
+        });
+
+        setMeta((prev) => ({
+          ...prev,
+          updatedAt: rawResume?.updatedAt,
           changeId: null,
         }));
-        // isFreshResumeRef.current = false;
       } catch (err) {
         if (isMountedRef.current) {
           console.error(err);
-          const error =
+          const appError =
             err instanceof AppError
               ? err
               : new AppError("Something went wrong", { status: 500 });
-          setState((prev) => ({ ...prev, error, currentResumeId: null }));
+          setMeta((prev) => ({ ...prev, error: appError, currentResumeId: null }));
         }
       } finally {
         if (isMountedRef.current) {
-          setState((prev) => ({ ...prev, isLoading: false }));
+          setMeta((prev) => ({ ...prev, isLoading: false }));
         }
       }
     };
 
     fetchResume();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const updateSection = (step: Pick<Step, "id" | "data">) => {
-    setState((prev) => {
-      const state = {
-        ...prev,
-        steps: prev.steps.map((s) =>
+  // ── Mutating operations ────────────────────────────────────────────────────
+  // All callbacks use functional updaters `(current) => nextState` so they
+  // never need to capture `present` in their closure — making them stable
+  // (deps: [pushHistory] which never changes) and preventing render loops.
+
+  const updateSection = useCallback(
+    (step: Pick<Step, "id" | "data">) => {
+      pushHistory((current) => ({
+        ...current,
+        steps: current.steps.map((s) =>
           s.id === step.id ? { ...s, data: step.data as any } : s,
         ),
-        changeId: createId(),
-      };
-      return state;
-    });
-  };
+      }));
+      setMeta((prev) => ({ ...prev, changeId: createId() }));
+    },
+    [pushHistory],
+  );
 
-  const setSteps = (updater: Step[] | ((prev: Step[]) => Step[])) => {
-    setState((prev) => ({
-      ...prev,
-      steps: typeof updater === "function" ? updater(prev.steps) : updater,
-      changeId: createId(),
-    }));
-  };
+  const setSteps = useCallback(
+    (updater: Step[] | ((prev: Step[]) => Step[])) => {
+      pushHistory((current) => ({
+        ...current,
+        steps: typeof updater === "function" ? updater(current.steps) : updater,
+      }));
+      setMeta((prev) => ({ ...prev, changeId: createId() }));
+    },
+    [pushHistory],
+  );
 
   const addSection = useCallback(
     (input: AddStepInput) => {
@@ -169,69 +208,88 @@ export const useResume = ({
         enabled: true,
         data: {},
       };
-
-      setState((prev) => ({
-        ...prev,
-        steps: [...prev.steps, newSection],
-        changeId: createId(),
+      pushHistory((current) => ({
+        ...current,
+        steps: [...current.steps, newSection],
       }));
-
+      setMeta((prev) => ({ ...prev, changeId: createId() }));
       return newSection;
     },
-    [setState],
+    [pushHistory],
   );
 
   const removeSection = useCallback(
     (stepId: string) => {
       if (!stepId.startsWith("other-field-")) return;
-      setState((prev) => ({
-        ...prev,
-        steps: prev.steps.filter((s) => s.id !== stepId),
-        changeId: createId(),
+      pushHistory((current) => ({
+        ...current,
+        steps: current.steps.filter((s) => s.id !== stepId),
       }));
+      setMeta((prev) => ({ ...prev, changeId: createId() }));
     },
-    [setState],
+    [pushHistory],
   );
 
   const setTemplate = useCallback(
     (template: string) => {
-      setState((prev) => ({
-        ...prev,
-        template,
-        changeId: createId(),
+      pushHistory((current) => ({
+        ...current,
+        metadata: { ...current.metadata, template },
       }));
+      setMeta((prev) => ({ ...prev, changeId: createId() }));
     },
-    [setState],
+    [pushHistory],
   );
 
   const setColorHex = useCallback(
     (colorHex: string) => {
-      setState((prev) => ({
-        ...prev,
-        colorHex,
-        changeId: createId(),
+      pushHistory((current) => ({
+        ...current,
+        metadata: { ...current.metadata, colorHex },
       }));
+      setMeta((prev) => ({ ...prev, changeId: createId() }));
     },
-    [setState],
+    [pushHistory],
   );
 
   const updateResumeMetadata = useCallback(
     (data: Partial<ResumeMetadata>) => {
-      setState((prev) => ({
-        ...prev,
-        metadata: { ...prev.metadata, ...data },
-        changeId: createId(),
+      pushHistory((current) => ({
+        ...current,
+        metadata: { ...current.metadata, ...data },
       }));
+      setMeta((prev) => ({ ...prev, changeId: createId() }));
     },
-    [setState],
+    [pushHistory],
   );
 
+  // ── Undo / Redo wrappers ───────────────────────────────────────────────────
+  // historyUndo / historyRedo are stable (empty useCallback deps in useHistory)
+
+  const undo = useCallback(() => {
+    historyUndo();
+    setMeta((prev) => ({ ...prev, changeId: createId() }));
+  }, [historyUndo]);
+
+  const redo = useCallback(() => {
+    historyRedo();
+    setMeta((prev) => ({ ...prev, changeId: createId() }));
+  }, [historyRedo]);
+
   return {
-    ...state,
-    error: state.error || error,
+    ...meta,
+    steps,
+    metadata,
+    error: meta.error || error,
     lastSaved,
     hasUnsavedChanges,
     isSaving,
+    // history
+    canUndo,
+    canRedo,
+    undo,
+    redo,
+    // mutations
     setSteps,
     updateSection,
     addSection,

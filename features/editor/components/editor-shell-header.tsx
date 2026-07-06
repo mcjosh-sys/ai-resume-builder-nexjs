@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/ui/logo";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useFromNow } from "@/hooks/use-from-now";
-import { Loader2, Menu, Save, Settings } from "lucide-react";
+import { Loader2, Menu, Redo2, Save, Settings, Undo2 } from "lucide-react";
 import { ComponentProps } from "react";
 import { useEditorContext } from "../contexts/editor-context";
 
@@ -47,6 +47,7 @@ export function EditorShellHeader() {
           </div>
           <div className="flex items-center gap-1">
             <ThemeToggle />
+            <UndoRedoButtons />
             <SaveButton
               variant="ghost"
               size="icon-sm"
@@ -91,6 +92,7 @@ export function EditorShellHeader() {
               ))}
             </select> */}
 
+            <UndoRedoButtons showLabels />
             <SaveButton variant="outline" />
             <DownloadPdfButton
               steps={steps}
@@ -126,5 +128,39 @@ function SaveButton({
       {isSaving ? <Loader2 className="size-4 animate-spin" /> : <Save />}
       {iconOnly ? "" : "Save"}
     </Button>
+  );
+}
+
+function UndoRedoButtons({ showLabels = false }: { showLabels?: boolean }) {
+  const { history } = useEditorContext();
+  return (
+    <div className="flex items-center gap-0.5">
+      <Button
+        type="button"
+        variant="ghost"
+        size={showLabels ? "default" : "icon-sm"}
+        aria-label="Undo (Ctrl+Z)"
+        title="Undo (Ctrl+Z)"
+        disabled={!history.canUndo}
+        onClick={history.undo}
+        className={showLabels ? "w-20 justify-start" : ""}
+      >
+        <Undo2 className="size-4 shrink-0" />
+        {showLabels && <span className="text-sm font-medium">Undo</span>}
+      </Button>
+      <Button
+        type="button"
+        variant="ghost"
+        size={showLabels ? "default" : "icon-sm"}
+        aria-label="Redo (Ctrl+Shift+Z)"
+        title="Redo (Ctrl+Shift+Z)"
+        disabled={!history.canRedo}
+        onClick={history.redo}
+        className={showLabels ? "w-20 justify-start" : ""}
+      >
+        <Redo2 className="size-4 shrink-0" />
+        {showLabels && <span className="text-sm font-medium">Redo</span>}
+      </Button>
+    </div>
   );
 }

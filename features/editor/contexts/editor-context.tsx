@@ -17,6 +17,12 @@ export type EditorContext = {
     currentResumeId?: string | null;
     save: () => Promise<void>;
   };
+  history: {
+    canUndo: boolean;
+    canRedo: boolean;
+    undo: () => void;
+    redo: () => void;
+  };
   updateSection: (step: Pick<Step, "id" | "data">) => void;
   setSteps: (updater: Step[] | ((prev: Step[]) => Step[])) => void;
   stepper: {
@@ -59,6 +65,12 @@ export const EditorContext = createContext<EditorContext>({
     hasUnsavedChanges: false,
     currentResumeId: null,
     save: async () => {},
+  },
+  history: {
+    canUndo: false,
+    canRedo: false,
+    undo: () => {},
+    redo: () => {},
   },
   stepper: {
     steps: [],
