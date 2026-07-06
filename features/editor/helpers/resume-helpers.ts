@@ -435,30 +435,40 @@ export function parseResumeToTemplateResume(resume: RawResume): TemplateResume {
 
 export function stepsToAIResume(steps: Step[]): AIResume {
   const formatItemDescription = (item: any) => {
-    if (item.description && isSerializedRichText(item.description)) {
-      item.description = editorStateToHtml(item.description);
+    if (item && typeof item === "object") {
+      // Convert any rich-text string fields on the object
+      Object.keys(item).forEach((key) => {
+        if (isSerializedRichText(item[key])) {
+          item[key] = editorStateToHtml(item[key]);
+        }
+      });
+    } else if (isSerializedRichText(item)) {
+      return editorStateToHtml(item);
     }
     return item;
   };
+
+  const RICH_TEXT_STEP_IDS = [
+    "summary",
+    "experience",
+    "education",
+    "projects",
+    "certifications",
+    "awards",
+  ];
 
   return steps.map((step) => {
     const content = cloneDeep(step.data);
     if (
       content &&
-      ([
-        "experience",
-        "education",
-        "projects",
-        "certifications",
-        "awards",
-      ].includes(step.id) ||
+      (RICH_TEXT_STEP_IDS.includes(step.id) ||
         step.id.startsWith("other-field-"))
     ) {
       Object.entries(content).forEach(([key, value]) => {
         if (Array.isArray(value)) {
           (content as any)[key] = value.map(formatItemDescription);
-        } else if (key === "description") {
-          (content as any).description = formatItemDescription(value);
+        } else if (isSerializedRichText(value)) {
+          (content as any)[key] = editorStateToHtml(value as string);
         }
       });
     }

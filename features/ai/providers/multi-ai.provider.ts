@@ -26,7 +26,7 @@ export class MultiAIProviderRouter extends AIProvider {
     switch (task) {
       case "rewrite":
       case "improve":
-        return [this.providers[1], this.providers[0]];
+        return [this.providers[0], this.providers[1]];
       case "tailor":
         return [this.providers[0], this.providers[1]];
       case "analyze":

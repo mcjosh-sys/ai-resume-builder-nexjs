@@ -19,6 +19,8 @@ export async function rewriteResume(resume: AIResume) {
     const parsed = parseAIJSON<AIResume>(response);
     return parsed;
   } catch (error) {
+    // const errorFilePath = path.join(process.cwd(), `resume_parse_error_${Date.now()}.txt`);
+    // fs.writeFileSync(errorFilePath, response);
     throw new AppError("Failed to parse AI response", {
       code: "AI_RESPONSE_PARSE_ERROR",
       cause: error,
