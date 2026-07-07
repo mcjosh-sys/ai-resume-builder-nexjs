@@ -21,7 +21,7 @@ import { useResumeAI } from "@/hooks/use-resume-ai";
 import useSimpleDebounce from "@/hooks/use-simple-debounce";
 import { cn } from "@/lib/utils";
 import { useAISuggestionStore } from "@/store/ai-suggestions.store";
-import { Loader2, Sparkles, WandSparkles } from "lucide-react";
+import { Loader2, Sparkles, WandSparkles, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useEditorContext } from "../contexts/editor-context";
@@ -33,9 +33,22 @@ type EditorCopilotPanelProps = {
 };
 
 const QUICK_ACTIONS = [
-  { id: "rewrite", label: "Rewrite with AI", icon: WandSparkles },
-  // { id: "bullets", label: "Improve Bullet Points", icon: Zap },
-  { id: "tailor", label: "Tailor to Job", icon: Sparkles },
+  {
+    id: "rewrite",
+    label: "Rewrite with AI",
+    description: "Enhance clarity and impact",
+    icon: WandSparkles,
+    color: "text-violet-600 dark:text-violet-400",
+    bg: "bg-violet-100 dark:bg-violet-900/40",
+  },
+  {
+    id: "tailor",
+    label: "Tailor to Job",
+    description: "Match a specific role",
+    icon: Zap,
+    color: "text-blue-600 dark:text-blue-400",
+    bg: "bg-blue-100 dark:bg-blue-900/40",
+  },
 ] as const;
 
 export function EditorCopilotPanel({
@@ -53,14 +66,10 @@ export function EditorCopilotPanel({
   } = useEditorContext();
 
   const [applyingId, setApplyingId] = useState<string | null>(null);
-
   const { suggestions, isSuggesting } = useAISuggestionStore();
-  const removeSuggestion = useAISuggestionStore(
-    (state) => state.removeSuggestion,
-  );
+  const removeSuggestion = useAISuggestionStore((s) => s.removeSuggestion);
 
   const [jobDescription, setJobDescription] = useState(resumeJobDescription);
-
   const {
     status: aiStatus,
     rewrite,
@@ -165,16 +174,18 @@ export function EditorCopilotPanel({
 
   const quickActionHandlers: Record<string, () => void> = {
     rewrite: handleRewrite,
-    bullets: handleRewrite,
     tailor: () => setIsTailorModalOpen(true),
   };
+
+  const isAIRunning =
+    aiModal.isOpen && aiModal.isLoading && aiStatus !== "idle";
 
   return (
     <>
       {/* ── AI Result Modal ── */}
       <AIResultModal modal={aiModal} onAccept={handleAccept} />
 
-      {/* ── Tailor Job Modal ── */}
+      {/* ── Tailor to Job Modal ── */}
       <Dialog open={isTailorModalOpen} onOpenChange={setIsTailorModalOpen}>
         <DialogContent className="flex max-h-[90dvh] flex-col sm:max-w-xl">
           <DialogHeader>
@@ -187,7 +198,7 @@ export function EditorCopilotPanel({
           <Textarea
             value={jobDescription}
             onChange={(e) => setJobDescription(e.target.value)}
-            placeholder="Paste job description here..."
+            placeholder="Paste job description here…"
             className="h-full resize-none"
           />
           <DialogFooter>
@@ -198,90 +209,99 @@ export function EditorCopilotPanel({
               Cancel
             </Button>
             <Button
-              className="bg-linear-to-r from-violet-600 to-blue-600"
+              className="bg-linear-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500"
               onClick={handleTailorJob}
               disabled={aiStatus !== "idle" || !jobDescription.trim()}
             >
-              <Sparkles className="mr-2 h-4 w-4" />
+              <Sparkles className="size-4" />
               Tailor Resume
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* ── Panel body ── */}
+      {/* ── Panel Body ── */}
       <div className={cn("space-y-4", mobile && "space-y-5")}>
-        <div
-          className={cn(
-            "rounded-xl border bg-violet-50/60 p-4",
-            mobile && "bg-violet-50",
-          )}
-        >
+        {/* Header banner */}
+        <div className="rounded-xl border bg-linear-to-br from-violet-50 to-blue-50 dark:from-violet-950/25 dark:to-blue-950/25 dark:border-violet-900/30 p-4">
           <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-linear-to-br from-violet-500 to-blue-500 p-2 text-white">
-              <Sparkles className="size-6" />
+            <div className="rounded-xl bg-linear-to-br from-violet-500 to-blue-500 p-2 text-white shadow-sm">
+              <Sparkles className="size-5" />
             </div>
             <div>
-              <p className="text-3xl font-semibold">AI Copilot</p>
-              <p className="text-muted-foreground">
+              <p className="text-lg font-bold leading-tight">AI Copilot</p>
+              <p className="text-xs text-muted-foreground">
                 Your intelligent writing assistant
               </p>
             </div>
           </div>
 
+          {/* Mobile tab switcher */}
           {mobile && (
-            <div className="mt-4 rounded-full bg-muted p-1">
+            <div className="mt-4 rounded-full bg-background/70 p-1">
               <div className="grid grid-cols-2 gap-1">
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("actions")}
-                  className={cn(
-                    "rounded-full px-3 py-2 text-sm font-semibold",
-                    activeTab === "actions" && "bg-background",
-                  )}
-                >
-                  Quick Actions
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("suggestions")}
-                  className={cn(
-                    "rounded-full px-3 py-2 text-sm font-semibold",
-                    activeTab === "suggestions" && "bg-background",
-                  )}
-                >
-                  Suggestions
-                </button>
+                {(["actions", "suggestions"] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    type="button"
+                    onClick={() => setActiveTab(tab)}
+                    className={cn(
+                      "rounded-full px-3 py-2 text-sm font-semibold capitalize transition-all duration-150",
+                      activeTab === tab
+                        ? "bg-background shadow-sm text-foreground"
+                        : "text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    {tab === "actions" ? "Quick Actions" : "Suggestions"}
+                    {tab === "suggestions" && suggestions.length > 0 && (
+                      <span className="ml-1.5 inline-flex size-4 items-center justify-center rounded-full bg-violet-500 text-[10px] text-white">
+                        {suggestions.length}
+                      </span>
+                    )}
+                  </button>
+                ))}
               </div>
             </div>
           )}
         </div>
 
+        {/* Quick actions */}
         {(!mobile || activeTab === "actions") && (
-          <Card>
-            <CardHeader className="border-b pb-3">
-              <CardTitle className="text-xl">Quick Actions</CardTitle>
+          <Card className="shadow-sm">
+            <CardHeader className="border-b pb-3 pt-4 px-4">
+              <CardTitle className="text-base font-semibold">
+                Quick Actions
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3 pt-4">
+            <CardContent className="space-y-2 p-3">
               {QUICK_ACTIONS.map((action) => {
                 const Icon = action.icon;
-                const isRunning =
-                  aiModal.isOpen && aiModal.isLoading && aiStatus !== "idle";
                 return (
                   <button
                     key={action.id}
                     type="button"
-                    disabled={isRunning}
-                    className={cn(
-                      "flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left text-lg font-medium transition-colors hover:bg-muted/40",
-                      isRunning && "cursor-not-allowed opacity-60",
-                    )}
+                    disabled={isAIRunning}
                     onClick={() => quickActionHandlers[action.id]?.()}
+                    className={cn(
+                      "group flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left transition-all duration-150",
+                      "hover:bg-muted/50 hover:border-muted-foreground/20 hover:shadow-sm",
+                      isAIRunning && "cursor-not-allowed opacity-50",
+                    )}
                   >
-                    <span className="rounded-lg bg-muted p-2">
-                      <Icon className="size-4" />
+                    <span
+                      className={cn(
+                        "rounded-lg p-2 shrink-0 transition-transform group-hover:scale-105",
+                        action.bg,
+                      )}
+                    >
+                      <Icon className={cn("size-4", action.color)} />
                     </span>
-                    {action.label}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold">{action.label}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {action.description}
+                      </p>
+                    </div>
                   </button>
                 );
               })}
@@ -289,52 +309,55 @@ export function EditorCopilotPanel({
           </Card>
         )}
 
+        {/* Job description + suggestions */}
         {(!mobile || activeTab === "suggestions") && (
           <>
-            <Card>
-              <CardHeader className="border-b pb-3">
-                <CardTitle className="text-xl">Job Description</CardTitle>
+            <Card className="shadow-sm">
+              <CardHeader className="border-b pb-3 pt-4 px-4">
+                <CardTitle className="text-base font-semibold">
+                  Job Description
+                </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4 pt-4">
+              <CardContent className="space-y-3 p-3">
                 <Textarea
                   rows={4}
                   value={jobDescription}
                   onChange={(e) => setJobDescription(e.target.value)}
-                  placeholder="Paste the job description here to get AI-powered suggestions..."
-                  className="resize-none"
+                  placeholder="Paste a job description to get AI-powered suggestions…"
+                  className="resize-none text-sm max-h-48"
                 />
                 <Button
-                  className="w-full bg-linear-to-r from-violet-600 to-blue-600"
+                  className="w-full bg-linear-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500"
                   onClick={handleAnalyzeAndOptimize}
                   disabled={isSuggesting || !jobDescription.trim()}
                 >
                   {isSuggesting ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Analyzing...
+                      <Loader2 className="size-4 animate-spin" />
+                      Analyzing…
                     </>
                   ) : (
                     <>
-                      <Sparkles />
-                      Analyze &amp; Optimize
+                      <Sparkles className="size-4" />
+                      Analyze & Optimize
                     </>
                   )}
                 </Button>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader className="border-b pb-3">
-                <CardTitle className="text-xl">
-                  AI Suggestions{" "}
+            <Card className="shadow-sm">
+              <CardHeader className="border-b pb-3 pt-4 px-4">
+                <CardTitle className="flex items-center gap-2 text-base font-semibold">
+                  AI Suggestions
                   {suggestions.length > 0 && (
-                    <span className="ml-1 inline-flex items-center justify-center rounded-full bg-violet-100 px-2 py-0.5 text-sm font-semibold text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">
+                    <span className="inline-flex items-center justify-center rounded-full bg-violet-100 px-2 py-0.5 text-xs font-semibold text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">
                       {suggestions.length}
                     </span>
                   )}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-4">
+              <CardContent className="p-3">
                 <SuggestionList
                   suggestions={suggestions}
                   applyingId={applyingId}

@@ -1,6 +1,6 @@
 "use client";
 
-import { Clock, Loader2 } from "lucide-react";
+import { CheckCircle2, Loader2 } from "lucide-react";
 import { useEditorContext } from "../contexts/editor-context";
 import { EditorBottomNav } from "./editor-bottom-nav";
 import { EditorCopilotPanel } from "./editor-copilot-panel";
@@ -24,32 +24,37 @@ export function EditorContent() {
   const handleTemplateChange = (template: string) => {
     updateResumeMetadata({ template });
   };
+
   return (
     <div className="h-full w-full relative">
+      {/* ── Save status floating indicator ── */}
       {(resume.isSaving || resume.lastSaved) && (
-        <div className="fixed bottom-24 right-4 lg:bottom-6 lg:right-6 z-50 flex items-center gap-2 rounded-full border bg-background/80 px-4 py-2 text-sm text-muted-foreground shadow-sm backdrop-blur-md">
+        <div className="fixed bottom-24 right-4 lg:bottom-5 lg:right-5 z-50 flex items-center gap-1.5 rounded-full border bg-background/90 px-3 py-1.5 text-xs text-muted-foreground shadow-md backdrop-blur-sm transition-opacity">
           {resume.isSaving ? (
             <>
-              <Loader2 className="size-4 animate-spin text-blue-500" />
-              Saving...
+              <Loader2 className="size-3 animate-spin text-primary" />
+              <span>Saving…</span>
             </>
           ) : (
             resume.lastSaved && (
               <>
-                <Clock className="size-4" />
-                Last saved:{" "}
-                {resume.lastSaved.toLocaleTimeString(undefined, {
-                  hour: "numeric",
-                  minute: "2-digit",
-                })}
+                <CheckCircle2 className="size-3 text-emerald-500" />
+                <span>
+                  Saved at{" "}
+                  {resume.lastSaved.toLocaleTimeString(undefined, {
+                    hour: "numeric",
+                    minute: "2-digit",
+                  })}
+                </span>
               </>
             )
           )}
         </div>
       )}
 
+      {/* ── Mobile layout (< lg) ── */}
       <div className="lg:hidden">
-        <main className="space-y-4 px-4 py-4 pb-48">
+        <main className="space-y-4 px-4 py-4 pb-28">
           {activeMobileMode === "edit" && (
             <EditorWorkspace
               mode="edit"
@@ -73,37 +78,34 @@ export function EditorContent() {
         />
       </div>
 
-      <div className="hidden relative lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:h-full">
-        <section className="flex flex-col h-full">
-          <div className="border-b p-3 sticky top-0 z-10 bg-background">
-            <div className="inline-flex rounded-xl bg-muted p-1">
-              <button
-                type="button"
-                onClick={() => setActiveDesktopWorkspaceTab("edit")}
-                className={[
-                  "rounded-lg px-4 py-1.5 text-sm font-semibold",
-                  activeDesktopWorkspaceTab === "edit" ? "bg-background" : "",
-                ].join(" ")}
-              >
-                Edit
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveDesktopWorkspaceTab("preview")}
-                className={[
-                  "rounded-lg px-4 py-1.5 text-sm font-semibold",
-                  activeDesktopWorkspaceTab === "preview"
-                    ? "bg-background"
-                    : "",
-                ].join(" ")}
-              >
-                Preview
-              </button>
+      {/* ── Desktop layout (≥ lg) ── */}
+      <div className="hidden lg:flex lg:h-full">
+        {/* Left: edit / preview workspace */}
+        <section className="flex flex-col flex-1 min-w-0 h-full overflow-hidden">
+          {/* Tab strip */}
+          <div className="shrink-0 border-b bg-background px-4 py-2.5 flex items-center gap-2">
+            <div className="inline-flex rounded-lg bg-muted p-1 gap-0.5">
+              {(["edit", "preview"] as const).map((tab) => (
+                <button
+                  key={tab}
+                  type="button"
+                  onClick={() => setActiveDesktopWorkspaceTab(tab)}
+                  className={[
+                    "rounded-md px-4 py-1.5 text-sm font-semibold capitalize transition-all duration-150",
+                    activeDesktopWorkspaceTab === tab
+                      ? "bg-background text-foreground shadow-sm ring-1 ring-border/50"
+                      : "text-muted-foreground hover:text-foreground",
+                  ].join(" ")}
+                >
+                  {tab}
+                </button>
+              ))}
             </div>
           </div>
 
-          <div className="h-full relative overflow-y-auto p-5 w-full">
-            <div className="absolute top-0 left-0 w-full p-4">
+          {/* Scrollable content */}
+          <div className="flex-1 min-h-0 overflow-y-auto">
+            <div className="p-5">
               <EditorWorkspace
                 mode={activeDesktopWorkspaceTab}
                 selectedTemplate={selectedTemplate}
@@ -113,8 +115,9 @@ export function EditorContent() {
           </div>
         </section>
 
-        <aside className="border-l bg-violet-50/40 relative overflow-y-auto h-full">
-          <div className="absolute top-0 left-0 p-4">
+        {/* Right: AI Copilot panel */}
+        <aside className="w-[360px] shrink-0 border-l bg-muted/20 h-full overflow-y-auto">
+          <div className="p-4">
             <EditorCopilotPanel />
           </div>
         </aside>

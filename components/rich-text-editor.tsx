@@ -96,7 +96,7 @@ export default function RichTextEditor({
   }, [initialValue]); // Deliberately only watching initialValue
 
   return (
-    <div className="bg-background w-full overflow-hidden rounded-lg border">
+    <div className="bg-background w-full overflow-hidden rounded-lg border shadow-sm">
       <LexicalComposer
         key={editorKey}
         initialConfig={{
@@ -136,21 +136,16 @@ export function Plugins({
     <div className="relative">
       <ToolbarPlugin>
         {({ blockType }) => (
-          <div className="vertical-align-middle sticky top-0 z-10 flex gap-2 overflow-auto border-b p-1">
-            {/* <BlockFormatButtons>
-              <FormatBulletedListButton />
-              <FormatNumberedListButton />
-              <FormatParagraphButton />
-            </BlockFormatButtons> */}
+          <div className="sticky top-0 z-10 flex flex-wrap items-center gap-1 border-b bg-muted/30 px-2 py-1.5">
             <BlockFormatDropDown>
               <FormatParagraph />
               <FormatHeading levels={["h1", "h2", "h3"]} />
               <FormatBulletedList />
               <FormatNumberedList />
             </BlockFormatDropDown>
+            <div aria-hidden="true" className="mx-0.5 h-4 w-px bg-border" />
             <FontFormatToolbarPlugin />
-            {/* <FormatNumberedList />
-            <FormatBulletedList /> */}
+            <div aria-hidden="true" className="mx-0.5 h-4 w-px bg-border" />
             <LinkToolbarPlugin setIsLinkEditMode={setIsLinkEditMode} />
           </div>
         )}
@@ -162,7 +157,7 @@ export function Plugins({
               <div className="" ref={onRef}>
                 <ContentEditable
                   placeholder={placeholder}
-                  className="ContentEditable__root relative block h-72 min-h-72 overflow-auto px-8 py-4 focus:outline-none"
+                  className="ContentEditable__root relative block min-h-36 h-auto max-h-72 overflow-y-auto px-5 py-3 text-sm focus:outline-none"
                 />
               </div>
             </div>

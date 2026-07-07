@@ -154,9 +154,9 @@ function InlineDiff({ original, revised }: { original: string; revised: string }
           key={i}
           className={cn(
             tok.type === "removed" &&
-              "bg-red-100 text-red-700 line-through rounded-sm px-0.5",
+              "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300 line-through rounded-sm px-0.5",
             tok.type === "added" &&
-              "bg-green-100 text-green-700 rounded-sm px-0.5 font-medium",
+              "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300 rounded-sm px-0.5 font-medium",
           )}
         >
           {tok.text}
@@ -237,7 +237,7 @@ function SuggestionDiffCard({ suggestion }: { suggestion: AISuggestion }) {
             <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
               Original
             </p>
-            <p className="text-sm leading-relaxed bg-red-50 text-red-800 px-3 py-2 rounded-lg line-through opacity-80 whitespace-pre-wrap">
+            <p className="text-sm leading-relaxed bg-red-50 text-red-800 dark:bg-red-900/30 dark:text-red-300 px-3 py-2 rounded-lg line-through opacity-80 whitespace-pre-wrap">
               {originalStr}
             </p>
           </div>
@@ -248,7 +248,7 @@ function SuggestionDiffCard({ suggestion }: { suggestion: AISuggestion }) {
             <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
               Suggested
             </p>
-            <p className="text-sm leading-relaxed bg-green-50 text-green-800 px-3 py-2 rounded-lg whitespace-pre-wrap">
+            <p className="text-sm leading-relaxed bg-green-50 text-green-800 dark:bg-green-900/30 dark:text-green-300 px-3 py-2 rounded-lg whitespace-pre-wrap">
               {suggestedStr}
             </p>
           </div>
@@ -298,19 +298,19 @@ function RewriteDiffCard({
 
       {/* Before / After */}
       <div className="grid grid-cols-2 divide-x">
-        <div className="px-4 py-3 space-y-1 bg-red-50/40">
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-red-400">
+        <div className="px-4 py-3 space-y-1 bg-red-50/40 dark:bg-red-900/20">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-red-400 dark:text-red-400">
             Before
           </p>
-          <p className="text-sm leading-relaxed text-red-800 whitespace-pre-wrap">
+          <p className="text-sm leading-relaxed text-red-800 dark:text-red-300 whitespace-pre-wrap">
             {originalText}
           </p>
         </div>
-        <div className="px-4 py-3 space-y-1 bg-green-50/40">
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-green-500">
+        <div className="px-4 py-3 space-y-1 bg-green-50/40 dark:bg-green-900/20">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-green-500 dark:text-green-400">
             After
           </p>
-          <p className="text-sm leading-relaxed text-green-800 whitespace-pre-wrap">
+          <p className="text-sm leading-relaxed text-green-800 dark:text-green-300 whitespace-pre-wrap">
             {newText}
           </p>
         </div>

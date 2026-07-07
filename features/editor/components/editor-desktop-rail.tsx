@@ -3,12 +3,19 @@
 import { Button } from "@/components/ui/button";
 import { useModal } from "@/hooks/use-modal";
 import { cn } from "@/lib/utils";
-import { Eye, EyeOff, GripVertical, Lock, Plus, Sparkles, Trash2 } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  GripVertical,
+  Lock,
+  Plus,
+  Sparkles,
+  Trash2,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import { useEditorContext } from "../contexts/editor-context";
-import { AddSectionModal } from "./add-section-modal";
-
 import { FIXED_STEP_IDS } from "../resource/steps";
+import { AddSectionModal } from "./add-section-modal";
 
 type EditorDesktopRailProps = {
   className?: string;
@@ -36,63 +43,55 @@ export function EditorDesktopRail({
 
   const filteredSteps = useMemo(() => {
     const term = filter.trim().toLowerCase();
-    if (!term) {
-      return steps;
-    }
+    if (!term) return steps;
     return steps.filter((step) => step.title.toLowerCase().includes(term));
   }, [filter, steps]);
 
   return (
     <div className={cn("flex h-full flex-col bg-background", className)}>
-      <div className="border-b px-5 py-5">
-        <p className="text-sm font-semibold tracking-wide text-muted-foreground">
-          RESUME SECTIONS
+      {/* Header */}
+      <div className="border-b px-4 py-4">
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+          Resume Sections
         </p>
         <input
-          className="mt-3 h-9 w-full rounded-md border bg-background px-3 text-sm"
-          placeholder="Filter sections..."
+          className="mt-2.5 h-9 w-full rounded-lg border bg-background px-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          placeholder="Filter sections…"
           value={filter}
-          onChange={(event) => setFilter(event.target.value)}
+          onChange={(e) => setFilter(e.target.value)}
         />
       </div>
 
-      <div className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+      {/* Step list */}
+      <div className="flex-1 overflow-y-auto px-2 py-3 space-y-0.5">
         {filteredSteps.map((step) => {
           const Icon = step.icon?.component;
           const isActive = currentStep?.id === step.id;
-          const isSummary = FIXED_STEP_IDS.includes(step.id as any);
+          const isFixed = FIXED_STEP_IDS.includes(step.id as any);
           const isEnabled = step.enabled !== false;
+          const isCustom = step.id.startsWith("other-field-");
 
           return (
             <button
               key={step.id}
               type="button"
-              draggable={!isSummary}
-              onDragStart={(event) => {
-                if (isSummary) {
-                  return;
-                }
-                event.dataTransfer.effectAllowed = "move";
-                event.dataTransfer.setData("text/plain", step.id);
+              draggable={!isFixed}
+              onDragStart={(e) => {
+                if (isFixed) return;
+                e.dataTransfer.effectAllowed = "move";
+                e.dataTransfer.setData("text/plain", step.id);
                 setDraggingStepId(step.id);
               }}
-              onDragOver={(event) => {
-                if (isSummary) {
-                  return;
-                }
-                event.preventDefault();
+              onDragOver={(e) => {
+                if (isFixed) return;
+                e.preventDefault();
                 setDragOverStepId(step.id);
               }}
-              onDrop={(event) => {
-                if (isSummary) {
-                  return;
-                }
-                event.preventDefault();
-                const activeStepId = event.dataTransfer.getData("text/plain");
-                if (!activeStepId) {
-                  return;
-                }
-                reorderStep(activeStepId as any, step.id);
+              onDrop={(e) => {
+                if (isFixed) return;
+                e.preventDefault();
+                const activeId = e.dataTransfer.getData("text/plain");
+                if (activeId) reorderStep(activeId as any, step.id);
                 setDragOverStepId(null);
                 setDraggingStepId(null);
               }}
@@ -105,66 +104,75 @@ export function EditorDesktopRail({
                 onSelectSection?.();
               }}
               className={cn(
-                "flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left",
-                isActive && "bg-blue-100 text-blue-700",
-                !isEnabled && "opacity-60",
-                draggingStepId === step.id && "opacity-60",
+                "group flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2.5 text-left transition-colors",
+                isActive
+                  ? "bg-primary/10 text-primary"
+                  : "text-foreground hover:bg-muted/60",
+                !isEnabled && "opacity-50",
+                draggingStepId === step.id && "opacity-40",
                 dragOverStepId === step.id &&
-                  !isSummary &&
-                  "ring-2 ring-blue-300",
-                !isSummary && "cursor-grab",
+                  !isFixed &&
+                  "ring-2 ring-primary/40",
+                !isFixed && "cursor-grab",
               )}
             >
-              {!isSummary && (
-                <GripVertical className="size-3.5 text-muted-foreground" />
-              )}
-              {Icon ? (
-                <Icon className="size-5" />
+              {/* Drag handle */}
+              {!isFixed ? (
+                <GripVertical className="size-3.5 shrink-0 text-muted-foreground/50" />
               ) : (
-                <Sparkles className="size-5" />
+                <span className="size-3.5 shrink-0" />
               )}
-              <span className="flex-1 text-2xl font-medium">{step.title}</span>
-              {isSummary ? (
-                <span className="inline-flex items-center gap-1 rounded-full border px-2 py-1 text-xs text-muted-foreground">
-                  <Lock className="size-3" />
+
+              {/* Icon */}
+              {Icon ? (
+                <Icon className={cn("size-4 shrink-0", isActive ? "text-primary" : "text-muted-foreground")} />
+              ) : (
+                <Sparkles className={cn("size-4 shrink-0", isActive ? "text-primary" : "text-muted-foreground")} />
+              )}
+
+              {/* Title */}
+              <span className="flex-1 truncate text-sm font-medium">
+                {step.title}
+              </span>
+
+              {/* Right actions */}
+              {isFixed ? (
+                <span className="inline-flex shrink-0 items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                  <Lock className="size-2.5" />
                   Fixed
                 </span>
               ) : (
-                <div className="flex items-center gap-0.5">
+                <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
                   <Button
                     type="button"
                     variant="ghost"
                     size="icon-sm"
-                    className="size-8"
-                    onClick={(event) => {
-                      event.stopPropagation();
+                    className="size-7"
+                    onClick={(e) => {
+                      e.stopPropagation();
                       toggleStepEnabled(step.id);
                     }}
-                    aria-label={
-                      isEnabled
-                        ? `Turn off ${step.title}`
-                        : `Turn on ${step.title}`
-                    }
+                    aria-label={isEnabled ? `Hide ${step.title}` : `Show ${step.title}`}
                   >
                     {isEnabled ? (
-                      <Eye className="size-4" />
+                      <Eye className="size-3.5" />
                     ) : (
-                      <EyeOff className="size-4" />
+                      <EyeOff className="size-3.5" />
                     )}
                   </Button>
-                  {step.id.startsWith("other-field-") && (
+                  {isCustom && (
                     <Button
                       type="button"
                       variant="ghost"
                       size="icon-sm"
-                      className="size-8"
-                      onClick={(event) => {
-                        event.stopPropagation();
+                      className="size-7"
+                      onClick={(e) => {
+                        e.stopPropagation();
                         removeStep(step.id);
                       }}
                       aria-label={`Remove ${step.title}`}
                     >
-                      <Trash2 className="size-4 text-muted-foreground hover:text-destructive" />
+                      <Trash2 className="size-3.5 text-muted-foreground transition-colors hover:text-destructive" />
                     </Button>
                   )}
                 </div>
@@ -174,11 +182,12 @@ export function EditorDesktopRail({
         })}
       </div>
 
-      <div className="border-t px-5 py-4">
+      {/* Footer */}
+      <div className="border-t px-3 py-3">
         <Button
           type="button"
           variant="ghost"
-          className="w-full justify-start text-blue-600"
+          className="w-full justify-start gap-2 text-primary hover:bg-primary/8 hover:text-primary"
           onClick={() => addSectionModal.open()}
         >
           <Plus className="size-4" />

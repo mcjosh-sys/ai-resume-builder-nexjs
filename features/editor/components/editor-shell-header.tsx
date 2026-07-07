@@ -6,7 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/ui/logo";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useFromNow } from "@/hooks/use-from-now";
-import { Loader2, Menu, Redo2, Save, Settings, Undo2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import {
+  CheckCircle2,
+  Loader2,
+  Menu,
+  Redo2,
+  Save,
+  Undo2,
+} from "lucide-react";
 import { ComponentProps } from "react";
 import { useEditorContext } from "../contexts/editor-context";
 
@@ -18,34 +26,31 @@ export function EditorShellHeader() {
     currentResumeId,
   } = useEditorContext();
 
-  const { selectedTemplate, setSelectedTemplate, colorHex } = editorState;
+  const { selectedTemplate, colorHex } = editorState;
   const sidebar = useSidebar();
   const fromNow = useFromNow(lastSaved);
+
   return (
     <>
-      <header className="sticky top-0 z-40 border-b bg-background xm:hidden">
-        <div className="flex items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-3">
+      {/* ── Mobile header (< xm breakpoint) ── */}
+      <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur-sm xm:hidden">
+        <div className="flex items-center justify-between px-3 py-2.5">
+          <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="icon-sm"
               type="button"
-              className="xm:hidden"
               onClick={sidebar.toggleSidebar}
               aria-label="Open sections"
             >
               <Menu className="size-5" />
             </Button>
             <div>
-              <p className="text-xl font-semibold leading-tight">My Resume</p>
-              {fromNow && (
-                <p className="text-sm text-muted-foreground">
-                  Last saved: {fromNow}
-                </p>
-              )}
+              <p className="text-base font-semibold leading-tight">My Resume</p>
+              <SaveStatusBadge isSaving={isSaving} fromNow={fromNow} compact />
             </div>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-0.5">
             <ThemeToggle />
             <UndoRedoButtons />
             <SaveButton
@@ -57,42 +62,38 @@ export function EditorShellHeader() {
             <DownloadPdfButton
               variant="ghost"
               size="icon-sm"
-              aria-label="Download"
+              aria-label="Download PDF"
               steps={steps}
               template={selectedTemplate}
               colorHex={colorHex}
               type="button"
             />
-            <Button variant="ghost" size="icon-sm" aria-label="Settings">
-              <Settings className="size-5" />
-            </Button>
           </div>
         </div>
       </header>
 
-      <header className="fixed h-18 inset-x-0 top-0 z-40 hidden border-b bg-background md:block">
-        <div className="flex items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-4">
-            <Logo /> |
-            <p className="text-muted-foreground font-semibold">My Resume</p>
+      {/* ── Desktop header (≥ xm breakpoint) ── */}
+      <header className="fixed h-16 inset-x-0 top-0 z-40 hidden border-b bg-background/95 backdrop-blur-sm xm:block">
+        <div className="flex h-full items-center justify-between px-6">
+          <div className="flex items-center gap-3">
+            <Logo />
+            <div
+              aria-hidden="true"
+              className="h-5 w-px bg-border"
+            />
+            <div className="flex flex-col">
+              <p className="text-sm font-semibold leading-tight text-foreground">
+                My Resume
+              </p>
+              <SaveStatusBadge isSaving={isSaving} fromNow={fromNow} />
+            </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <ThemeToggle />
-            {/* <select
-              value={selectedTemplate}
-              onChange={(event) => setSelectedTemplate(event.target.value)}
-              className="h-10 rounded-md border bg-background px-3 text-sm"
-              aria-label="Choose resume template"
-            >
-              {RESUME_TEMPLATES.map((template) => (
-                <option key={template.id} value={template.id}>
-                  {template.name} Template
-                </option>
-              ))}
-            </select> */}
-
-            <UndoRedoButtons showLabels />
+            <div className="flex items-center rounded-lg border bg-muted/40 p-0.5">
+              <UndoRedoButtons showLabels />
+            </div>
             <SaveButton variant="outline" />
             <DownloadPdfButton
               steps={steps}
@@ -100,13 +101,45 @@ export function EditorShellHeader() {
               colorHex={colorHex}
               type="button"
             >
-              {/* <Download /> */}
               Download PDF
             </DownloadPdfButton>
           </div>
         </div>
       </header>
     </>
+  );
+}
+
+function SaveStatusBadge({
+  isSaving,
+  fromNow,
+  compact = false,
+}: {
+  isSaving: boolean;
+  fromNow: string | null;
+  compact?: boolean;
+}) {
+  if (!isSaving && !fromNow) return null;
+
+  return (
+    <p
+      className={cn(
+        "flex items-center gap-1 text-muted-foreground",
+        compact ? "text-[11px]" : "text-xs",
+      )}
+    >
+      {isSaving ? (
+        <>
+          <Loader2 className="size-3 animate-spin text-primary" />
+          <span>Saving…</span>
+        </>
+      ) : (
+        <>
+          <CheckCircle2 className="size-3 text-emerald-500" />
+          <span>Saved {fromNow}</span>
+        </>
+      )}
+    </p>
   );
 }
 
@@ -125,8 +158,8 @@ function SaveButton({
       {...props}
       disabled={isSaving || !hasUnsavedChanges}
     >
-      {isSaving ? <Loader2 className="size-4 animate-spin" /> : <Save />}
-      {iconOnly ? "" : "Save"}
+      {isSaving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+      {!iconOnly && <span>Save</span>}
     </Button>
   );
 }
@@ -134,32 +167,30 @@ function SaveButton({
 function UndoRedoButtons({ showLabels = false }: { showLabels?: boolean }) {
   const { history } = useEditorContext();
   return (
-    <div className="flex items-center gap-0.5">
+    <div className="flex items-center">
       <Button
         type="button"
         variant="ghost"
-        size={showLabels ? "default" : "icon-sm"}
+        size={showLabels ? "sm" : "icon-sm"}
         aria-label="Undo (Ctrl+Z)"
         title="Undo (Ctrl+Z)"
         disabled={!history.canUndo}
         onClick={history.undo}
-        className={showLabels ? "w-20 justify-start" : ""}
       >
         <Undo2 className="size-4 shrink-0" />
-        {showLabels && <span className="text-sm font-medium">Undo</span>}
+        {showLabels && <span className="text-sm">Undo</span>}
       </Button>
       <Button
         type="button"
         variant="ghost"
-        size={showLabels ? "default" : "icon-sm"}
+        size={showLabels ? "sm" : "icon-sm"}
         aria-label="Redo (Ctrl+Shift+Z)"
         title="Redo (Ctrl+Shift+Z)"
         disabled={!history.canRedo}
         onClick={history.redo}
-        className={showLabels ? "w-20 justify-start" : ""}
       >
         <Redo2 className="size-4 shrink-0" />
-        {showLabels && <span className="text-sm font-medium">Redo</span>}
+        {showLabels && <span className="text-sm">Redo</span>}
       </Button>
     </div>
   );

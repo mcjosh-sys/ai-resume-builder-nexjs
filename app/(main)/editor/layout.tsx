@@ -17,7 +17,7 @@ export default function EditorLayout({ children }: PropsWithChildren) {
         <EditorSidebar />
         <div className="h-svh overflow-hidden flex flex-col w-full">
           <EditorShellHeader />
-          <div className="flex-1 min-h-0 overflow-auto lg:overflow-hidden w-full xm:mt-18">
+          <div className="flex-1 min-h-0 overflow-auto lg:overflow-hidden w-full xm:mt-16">
             {children}
           </div>
         </div>

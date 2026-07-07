@@ -10,7 +10,7 @@ import { getUserResumes } from "@/features/resume/actions/resume.actions";
 import { CreateResumeCard } from "@/features/resume/components/create-resume-card";
 import { ResumesList } from "@/features/resume/components/resumes-list";
 import { currentUser } from "@clerk/nextjs/server";
-import { FileText } from "lucide-react";
+import { FileText, Layers } from "lucide-react";
 import Link from "next/link";
 import { FaArrowRight, FaWandMagic } from "react-icons/fa6";
 
@@ -20,63 +20,69 @@ export default async function DashboardPage() {
     !user.lastSignInAt || user.createdAt === user.lastSignInAt;
 
   const recentResumes = await getUserResumes(4);
-  const totalCount = recentResumes.length; // will be overridden below if list > 4
 
   return (
     <PageWrapper>
-      {/* Header */}
-      <header>
-        <h1 className="text-xl font-bold">
-          Welcome{isFirstSignIn ? "," : " back,"} {user.firstName}! 👋
+      {/* ── Welcome header ── */}
+      <header className="space-y-1">
+        <h1 className="text-2xl font-bold tracking-tight">
+          {isFirstSignIn ? "Welcome," : "Welcome back,"}{" "}
+          {user.firstName}! 👋
         </h1>
         <p className="text-sm text-muted-foreground">
           Here&apos;s what CV Copilot has prepared for your job search today.
         </p>
       </header>
 
-      {/* Quick-action cards */}
-      <section>
-        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-          Quick Actions
-        </h2>
-        <div className="grid gap-5 sm:grid-cols-2 cursor-pointer">
+      {/* ── Quick-action cards ── */}
+      <section className="space-y-3">
+        <div className="flex items-center gap-2">
+          <Layers className="size-4 text-muted-foreground" />
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            Quick Actions
+          </h2>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
           <CreateResumeCard />
-          <Card className="group hover:border-violet-200 dark:hover:shadow-accent hover:shadow-md transition-shadow duration-200">
+          <Card className="group cursor-pointer hover:border-violet-300 dark:hover:border-violet-700 hover:shadow-md transition-all duration-200">
             <CardHeader>
               <div className="flex justify-between items-start">
-                <div className="rounded-md bg-violet-100 p-3 text-violet-600 transition-all duration-200 group-hover:scale-110">
-                  <FaWandMagic className="size-6" />
+                <div className="rounded-xl bg-violet-100 dark:bg-violet-900/40 p-3 text-violet-600 dark:text-violet-400 transition-transform duration-200 group-hover:scale-110">
+                  <FaWandMagic className="size-5" />
                 </div>
                 <Button
-                  variant="link"
+                  variant="ghost"
                   size="icon-sm"
-                  className="text-muted-foreground cursor-pointer group-hover:text-violet-600"
+                  className="text-muted-foreground cursor-pointer group-hover:text-violet-600 transition-colors"
+                  asChild
                 >
-                  <FaArrowRight />
+                  <span aria-hidden="true">
+                    <FaArrowRight className="size-3.5" />
+                  </span>
                 </Button>
               </div>
-              <CardTitle className="text-xl mt-4">Improve Existing</CardTitle>
+              <CardTitle className="mt-4 text-lg">Improve Existing</CardTitle>
               <CardDescription>
-                Upload your current CV for AI analysis.
+                Upload your current CV for AI-powered analysis and improvement.
               </CardDescription>
             </CardHeader>
           </Card>
         </div>
       </section>
 
-      {/* Recent Resumes */}
-      <section>
-        <div className="flex items-center justify-between mb-3">
+      {/* ── Recent Resumes ── */}
+      <section className="space-y-3">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <FileText className="size-4 text-muted-foreground" />
-            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
               Recent Resumes
             </h2>
           </div>
           {recentResumes.length > 0 && (
             <Link
               href="/resumes"
-              className="text-xs text-primary hover:underline flex items-center gap-1"
+              className="flex items-center gap-1 text-xs font-medium text-primary hover:underline transition-colors"
             >
               View all <FaArrowRight className="size-2.5" />
             </Link>

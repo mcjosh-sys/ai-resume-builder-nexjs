@@ -101,11 +101,11 @@ export function AIResultModal({ modal, onAccept }: AIResultModalProps) {
               {/* Legend */}
               <div className="mb-4 flex items-center gap-4 rounded-lg border bg-muted/30 px-4 py-2.5 text-xs text-muted-foreground">
                 <span className="flex items-center gap-1.5">
-                  <span className="inline-block h-2.5 w-2.5 rounded-sm bg-red-100 outline outline-red-300" />
+                  <span className="inline-block h-2.5 w-2.5 rounded-sm bg-red-100 dark:bg-red-900/50 outline outline-red-300 dark:outline-red-700" />
                   Removed
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <span className="inline-block h-2.5 w-2.5 rounded-sm bg-green-100 outline outline-green-300" />
+                  <span className="inline-block h-2.5 w-2.5 rounded-sm bg-green-100 dark:bg-green-900/50 outline outline-green-300 dark:outline-green-700" />
                   Added
                 </span>
                 <span className="ml-auto text-muted-foreground/70">
