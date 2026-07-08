@@ -10,34 +10,35 @@ An intelligent, full-stack resume builder that combines a rich editing experienc
 - Drag-and-drop section reordering powered by **dnd-kit**
 - **Lexical**-based rich text editing for freeform content
 - Section management: enable/disable, reorder, or add custom sections
-- Photo upload via **UploadThing**
+- Photo upload via **UploadThing** (using Direct Server Uploads)
 - Live resume preview with instant reflection of changes
 
 ### 🤖 AI Copilot
-- **Rewrite with AI** — rewrites your entire resume with improved, professional language
+- **Rewrite with AI** — rewrites your entire resume with professional language
 - **Tailor to Job** — adapts your resume to match a specific job description
 - **Improve Bullet Points** — converts paragraph text into impactful bullet points
 - **Analyze & Optimize** — generates targeted per-section suggestions (insert / replace / delete) based on a job description
 - Multi-provider architecture: **Google Gemini**, **Groq**, and **OpenRouter** with automatic fallback
 
-### 🎨 Resume Templates (13 Designs)
+### 🎨 Resume Templates (15 Designs)
 | Template | Template | Template |
 |----------|----------|----------|
 | Aurora   | Axis     | Banner   |
-| Canvas   | Diff     | Ember    |
+| Canvas   | Chronicle| Ember    |
 | Focal    | Ledger   | Nova     |
 | Prism    | Sage     | Slate    |
-| Velvet   |          |          |
+| Summit   | Vanguard | Velvet   |
 
 - Per-resume color theme and border style (Squircle / Rounded / Square)
-- PDF export with print-optimised CSS
+- Pixel-perfect PDF export via headless browser rendering (**Puppeteer** & **Chromium** integration)
 
 ### 📄 Resume Sections
 - Header (name, job title, contact info, links)
 - Professional Summary
 - Work Experience
 - Education
-- Skills (with level & category)
+- Skills (with category and proficiency level)
+- Languages (with proficiency level)
 - Projects
 - Certifications
 - Awards
@@ -45,7 +46,7 @@ An intelligent, full-stack resume builder that combines a rich editing experienc
 
 ### 🔐 Auth & Subscriptions
 - Authentication via **Clerk** (sign-up, sign-in, session management)
-- Stripe-powered subscription model for premium features
+- Paystack-powered subscription model for premium/PRO/team tiers
 - ATS score tracking per resume
 
 ---
@@ -56,7 +57,7 @@ An intelligent, full-stack resume builder that combines a rich editing experienc
 |-------|-----------|
 | Framework | Next.js 16 (App Router) |
 | Language | TypeScript 5 |
-| UI | React 19, Radix UI, shadcn/ui, Framer Motion |
+| UI | React 19, Radix UI, Base UI, shadcn/ui, Framer Motion |
 | Styling | Tailwind CSS v4 |
 | Rich Text | Lexical |
 | Drag & Drop | dnd-kit |
@@ -64,7 +65,7 @@ An intelligent, full-stack resume builder that combines a rich editing experienc
 | Auth | Clerk |
 | AI Providers | Google Gemini, Groq, OpenRouter |
 | File Uploads | UploadThing |
-| Payments | Stripe |
+| Payments | Paystack |
 | Validation | Zod + React Hook Form |
 | Package Manager | Bun |
 
@@ -76,7 +77,7 @@ An intelligent, full-stack resume builder that combines a rich editing experienc
 - **Node.js** ≥ 20
 - **Bun** (recommended) — [install](https://bun.sh)
 - A PostgreSQL database (e.g. [Neon](https://neon.tech))
-- Clerk, Stripe, and at least one AI provider account
+- Clerk, Paystack, and at least one AI provider account
 
 ### Installation
 
@@ -97,31 +98,38 @@ Create a `.env` file at the project root. Required variables:
 # Database
 DATABASE_URL=
 
+# App Configuration
+NEXT_PUBLIC_APP_URL=http://localhost:3600
+
 # Clerk Authentication
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
 CLERK_SECRET_KEY=
 NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
 NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL=/dashboard
+NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL=/dashboard?isNew=true
 
 # AI Providers (configure at least one)
-GOOGLE_GENERATIVE_AI_API_KEY=
+GEMINI_API_KEY=
 GROQ_API_KEY=
 OPENROUTER_API_KEY=
 
 # UploadThing
-UPLOADTHING_SECRET=
-UPLOADTHING_APP_ID=
+UPLOADTHING_TOKEN=
 
-# Stripe
-STRIPE_SECRET_KEY=
-STRIPE_WEBHOOK_SECRET=
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
+# Paystack
+NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY=
+PAYSTACK_SECRET_KEY=
+PAYSTACK_PRO_MONTHLY_PLAN_CODE=
+PAYSTACK_PRO_ANNUAL_PLAN_CODE=
+PAYSTACK_TEAM_MONTHLY_PLAN_CODE=
+PAYSTACK_TEAM_ANNUAL_PLAN_CODE=
 ```
 
 ### Database Setup
 
 ```bash
-# Push schema to your database
+# Push schema to your database and generate Client
 bunx prisma db push
 
 # (Optional) Open Prisma Studio
@@ -136,7 +144,7 @@ bun run dev
 
 The app runs on **[http://localhost:3600](http://localhost:3600)**.
 
-> The dev script also compiles the PDF-specific CSS automatically before starting Next.js.
+> The dev script automatically compiles the styling (`globals.css` → `main.css`) before launching the Next.js server.
 
 ---
 
@@ -151,7 +159,7 @@ cvcopilot/
 │   │   ├── resumes/
 │   │   └── editor/
 │   ├── (marketing)/     # Public landing page
-│   └── api/             # API routes (resume CRUD, PDF export, UploadThing, Stripe)
+│   └── api/             # API routes (resume CRUD, PDF export, Paystack billing)
 ├── features/
 │   ├── ai/              # AI providers, prompts, and server actions
 │   │   ├── actions/     # rewrite, tailor, suggestions, bullet conversion
@@ -168,8 +176,9 @@ cvcopilot/
 ├── hooks/               # Global hooks (useResumeAI, useModal, etc.)
 ├── lib/                 # Utilities, Prisma client, error handling
 ├── prisma/              # Prisma schema and migrations
-├── providers/           # App-level providers (theme, etc.)
-├── server/              # Server-side helpers and DB queries
+├── providers/           # App-level providers (theme, clerk, etc.)
+├── server/              # Server-side helpers, actions (image upload/PDF generation), DB queries
+├── store/               # Zustand global state stores
 └── types/               # Shared TypeScript types
 ```
 
@@ -193,11 +202,11 @@ AI responses are returned as structured JSON or HTML and parsed with `parseAIJSO
 
 | Command | Description |
 |---------|-------------|
-| `bun run dev` | Build PDF CSS, then start Next.js dev server on port 3600 |
-| `bun run build` | Build PDF CSS, then build the production bundle |
+| `bun run dev` | Compile global CSS, then start Next.js dev server on port 3600 |
+| `bun run build` | Generate Prisma client, apply database migrations, compile CSS, and build Next.js production bundle |
 | `bun run start` | Start the production server |
-| `bun run lint` | Run ESLint |
-| `bun run build:pdf:css` | Compile `app/pdf.css` → `public/css/pdf.css` (Tailwind CLI) |
+| `bun run lint` | Run ESLint checks |
+| `bun run build:css` | Compile `app/globals.css` → `public/css/main.css` using Tailwind CSS CLI |
 | `bun run shadcn:add` | Add a shadcn/ui component |
 
 ---
