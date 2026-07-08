@@ -125,12 +125,7 @@ function SidebarStepItem({
           </span>
         ) : (
           <div className="flex shrink-0 items-center gap-0.5">
-            <Button
-              asChild
-              variant="ghost"
-              size="icon-sm"
-              className="size-6"
-            >
+            <Button asChild variant="ghost" size="icon-sm" className="size-6">
               <span
                 role="button"
                 tabIndex={0}
@@ -144,7 +139,9 @@ function SidebarStepItem({
                     onToggleEnabled(step.id);
                   }
                 }}
-                aria-label={isEnabled ? `Hide ${step.title}` : `Show ${step.title}`}
+                aria-label={
+                  isEnabled ? `Hide ${step.title}` : `Show ${step.title}`
+                }
               >
                 {isEnabled ? (
                   <Eye className="size-3.5 text-muted-foreground" />
@@ -154,12 +151,7 @@ function SidebarStepItem({
               </span>
             </Button>
             {isCustom && (
-              <Button
-                asChild
-                variant="ghost"
-                size="icon-sm"
-                className="size-6"
-              >
+              <Button asChild variant="ghost" size="icon-sm" className="size-6">
                 <span
                   role="button"
                   tabIndex={0}
@@ -208,15 +200,16 @@ export function EditorSidebar() {
   const filteredSteps = useMemo(() => {
     const term = filter.trim().toLowerCase();
     if (!term) return steps;
-    return steps.filter((step) =>
-      step.title.toLowerCase().includes(term),
-    );
+    return steps.filter((step) => step.title.toLowerCase().includes(term));
   }, [filter, steps]);
 
-  const { disabledSteps, enabledSteps } = useMemo(() => ({
-    disabledSteps: filteredSteps.filter((s) => s.enabled === false),
-    enabledSteps: filteredSteps.filter((s) => s.enabled !== false),
-  }), [filteredSteps]);
+  const { disabledSteps, enabledSteps } = useMemo(
+    () => ({
+      disabledSteps: filteredSteps.filter((s) => s.enabled === false),
+      enabledSteps: filteredSteps.filter((s) => s.enabled !== false),
+    }),
+    [filteredSteps],
+  );
 
   const dragHandlers = {
     onDragStart: (e: React.DragEvent, id: string) => {
@@ -257,7 +250,7 @@ export function EditorSidebar() {
         className="bg-background overflow-x-hidden xm:h-[calc(100vh-4rem)] xm:top-16"
       >
         <SidebarHeader className="gap-3 px-3 pt-4 pb-2">
-          <Logo className="xm:hidden" />
+          <Logo className="xm:hidden" link="/dashboard" />
           <div className="space-y-0.5">
             <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
               Editor

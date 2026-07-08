@@ -7,14 +7,7 @@ import { Logo } from "@/components/ui/logo";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useFromNow } from "@/hooks/use-from-now";
 import { cn } from "@/lib/utils";
-import {
-  CheckCircle2,
-  Loader2,
-  Menu,
-  Redo2,
-  Save,
-  Undo2,
-} from "lucide-react";
+import { CheckCircle2, Loader2, Menu, Redo2, Save, Undo2 } from "lucide-react";
 import { ComponentProps } from "react";
 import { useEditorContext } from "../contexts/editor-context";
 
@@ -76,11 +69,8 @@ export function EditorShellHeader() {
       <header className="fixed h-16 inset-x-0 top-0 z-40 hidden border-b bg-background/95 backdrop-blur-sm xm:block">
         <div className="flex h-full items-center justify-between px-6">
           <div className="flex items-center gap-3">
-            <Logo />
-            <div
-              aria-hidden="true"
-              className="h-5 w-px bg-border"
-            />
+            <Logo link="/dashboard" />
+            <div aria-hidden="true" className="h-5 w-px bg-border" />
             <div className="flex flex-col">
               <p className="text-sm font-semibold leading-tight text-foreground">
                 My Resume
@@ -158,7 +148,11 @@ function SaveButton({
       {...props}
       disabled={isSaving || !hasUnsavedChanges}
     >
-      {isSaving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+      {isSaving ? (
+        <Loader2 className="size-4 animate-spin" />
+      ) : (
+        <Save className="size-4" />
+      )}
       {!iconOnly && <span>Save</span>}
     </Button>
   );

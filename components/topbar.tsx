@@ -4,8 +4,8 @@ import { UserButton } from "@clerk/nextjs";
 import { CreditCard, Sparkles, Zap } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { ThemeToggle } from "./theme-toggle";
 
 function PlanBadge() {
@@ -45,16 +45,18 @@ export function Topbar() {
     <nav className="sticky top-0 z-20 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 px-4 sm:px-6 py-3 shadow-sm dark:shadow-slate-900">
       <div className="flex items-center justify-between max-w-7xl mx-auto">
         {/* Logo */}
-        <div className="flex items-center gap-2">
-          <Image
-            alt="logo"
-            src="/images/logo.png"
-            height="40"
-            width="40"
-            className="h-8 w-8 sm:h-10 sm:w-10"
-          />
-          <p className="font-bold text-lg sm:text-xl">CVCopilot</p>
-        </div>
+        <Link href="/dashboard">
+          <div className="flex items-center gap-2">
+            <Image
+              alt="logo"
+              src="/images/logo.png"
+              height="40"
+              width="40"
+              className="h-8 w-8 sm:h-10 sm:w-10"
+            />
+            <p className="font-bold text-lg sm:text-xl">CVCopilot</p>
+          </div>
+        </Link>
 
         {/* Actions */}
         <div className="flex items-center gap-2 sm:gap-4">
