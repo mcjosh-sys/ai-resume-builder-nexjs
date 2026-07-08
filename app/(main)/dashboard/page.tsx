@@ -25,16 +25,13 @@ export default async function DashboardPage() {
 
   return (
     <PageWrapper>
-      {/* Payment callback toast (success / failure) */}
       <Suspense fallback={null}>
         <PaymentToast />
       </Suspense>
 
-      {/* ── Welcome header ── */}
       <header className="space-y-1">
         <h1 className="text-2xl font-bold tracking-tight">
-          {isFirstSignIn ? "Welcome," : "Welcome back,"}{" "}
-          {user.firstName}! 👋
+          {isFirstSignIn ? "Welcome," : "Welcome back,"} {user.firstName}! 👋
         </h1>
         <p className="text-sm text-muted-foreground">
           Here&apos;s what CV Copilot has prepared for your job search today.
