@@ -1,5 +1,6 @@
 "use client";
 
+import { UpgradePrompt } from "@/components/upgrade-prompt";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -15,13 +16,15 @@ import {
   AIResultModal,
   AIResultModalData,
 } from "@/features/ai/components/ai-result-modal";
+import { getAIUsageSummary, getCurrentPlan } from "@/features/ai/actions/usage.action";
 import { AISuggestion } from "@/features/ai/prompts/suggestion.prompt";
 import { useModal } from "@/hooks/use-modal";
 import { useResumeAI } from "@/hooks/use-resume-ai";
 import useSimpleDebounce from "@/hooks/use-simple-debounce";
+import { UsageSummaryItem } from "@/lib/subscription";
 import { cn } from "@/lib/utils";
 import { useAISuggestionStore } from "@/store/ai-suggestions.store";
-import { Loader2, Sparkles, WandSparkles, Zap } from "lucide-react";
+import { Loader2, Lock, Sparkles, WandSparkles, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useEditorContext } from "../contexts/editor-context";
@@ -40,6 +43,7 @@ const QUICK_ACTIONS = [
     icon: WandSparkles,
     color: "text-violet-600 dark:text-violet-400",
     bg: "bg-violet-100 dark:bg-violet-900/40",
+    feature: "REWRITE" as const,
   },
   {
     id: "tailor",
@@ -48,6 +52,7 @@ const QUICK_ACTIONS = [
     icon: Zap,
     color: "text-blue-600 dark:text-blue-400",
     bg: "bg-blue-100 dark:bg-blue-900/40",
+    feature: "TAILOR" as const,
   },
 ] as const;
 
@@ -58,6 +63,13 @@ export function EditorCopilotPanel({
     "actions",
   );
   const [isTailorModalOpen, setIsTailorModalOpen] = useState(false);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [upgradeFeature, setUpgradeFeature] = useState<string | undefined>();
+  const [upgradeUsage, setUpgradeUsage] = useState<{ used: number; limit: number } | undefined>();
+
+  const [usageSummary, setUsageSummary] = useState<UsageSummaryItem[]>([]);
+  const [isPro, setIsPro] = useState(false);
+
   const {
     stepper: { steps },
     editorState: { updateResumeMetadata },
@@ -81,6 +93,16 @@ export function EditorCopilotPanel({
     delay: 500,
   });
 
+  // Load plan & usage on mount
+  useEffect(() => {
+    Promise.all([getAIUsageSummary(), getCurrentPlan()]).then(
+      ([summary, plan]) => {
+        setUsageSummary(summary);
+        setIsPro(plan === "PRO" || plan === "TEAM");
+      },
+    );
+  }, []);
+
   useEffect(() => {
     if (debouncedJobDescription) {
       updateResumeMetadata({ jobDescription: debouncedJobDescription });
@@ -89,6 +111,24 @@ export function EditorCopilotPanel({
 
   const aiModal = useModal<AIResultModalData>();
 
+  const getUsageFor = (feature: "REWRITE" | "TAILOR" | "SUGGESTIONS") =>
+    usageSummary.find((u) => u.feature === feature);
+
+  /** Returns true and opens upgrade prompt if the action is blocked */
+  const guardAction = (feature: "REWRITE" | "TAILOR" | "SUGGESTIONS", label: string): boolean => {
+    const usage = getUsageFor(feature);
+    if (!usage) return false;
+    if (usage.hardBlocked || usage.used >= usage.limit) {
+      setUpgradeFeature(label);
+      setUpgradeUsage(
+        usage.hardBlocked ? undefined : { used: usage.used, limit: usage.limit },
+      );
+      setUpgradeOpen(true);
+      return true;
+    }
+    return false;
+  };
+
   const handleAccept = (data: AIResultModalData) => {
     if (data.action === "rewrite" && data.newSteps) {
       setSteps(data.newSteps);
@@ -96,6 +136,7 @@ export function EditorCopilotPanel({
   };
 
   const handleRewrite = async () => {
+    if (guardAction("REWRITE", "AI Rewrite")) return;
     aiModal.open();
     aiModal.setIsLoading(true);
     try {
@@ -114,17 +155,23 @@ export function EditorCopilotPanel({
       aiModal.close();
     } finally {
       aiModal.setIsLoading(false);
+      // Refresh usage after action
+      getAIUsageSummary().then(setUsageSummary);
     }
   };
 
   const handleAnalyzeAndOptimize = () => {
     if (!jobDescription.trim()) return;
-    getSuggestions(jobDescription);
+    if (guardAction("SUGGESTIONS", "AI Suggestions")) return;
+    getSuggestions(jobDescription).then(() => {
+      getAIUsageSummary().then(setUsageSummary);
+    });
   };
 
   const handleTailorJob = async () => {
     setIsTailorModalOpen(false);
     if (!jobDescription.trim()) return;
+    if (guardAction("TAILOR", "AI Tailor to Job")) return;
     aiModal.open();
     aiModal.setIsLoading(true);
     try {
@@ -143,6 +190,7 @@ export function EditorCopilotPanel({
       aiModal.close();
     } finally {
       aiModal.setIsLoading(false);
+      getAIUsageSummary().then(setUsageSummary);
     }
   };
 
@@ -182,6 +230,14 @@ export function EditorCopilotPanel({
 
   return (
     <>
+      {/* ── Upgrade Prompt ── */}
+      <UpgradePrompt
+        open={upgradeOpen}
+        onOpenChange={setUpgradeOpen}
+        feature={upgradeFeature}
+        usage={upgradeUsage}
+      />
+
       {/* ── AI Result Modal ── */}
       <AIResultModal modal={aiModal} onAccept={handleAccept} />
 
@@ -276,6 +332,11 @@ export function EditorCopilotPanel({
             <CardContent className="space-y-2 p-3">
               {QUICK_ACTIONS.map((action) => {
                 const Icon = action.icon;
+                const usage = getUsageFor(action.feature);
+                const isBlocked = usage
+                  ? usage.hardBlocked || usage.used >= usage.limit
+                  : false;
+
                 return (
                   <button
                     key={action.id}
@@ -297,14 +358,49 @@ export function EditorCopilotPanel({
                       <Icon className={cn("size-4", action.color)} />
                     </span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold">{action.label}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-semibold">{action.label}</p>
+                        {isBlocked && (
+                          <span className="inline-flex items-center gap-0.5 rounded-full border border-violet-200 bg-violet-50 px-1.5 py-0.5 text-[10px] font-semibold text-violet-600 dark:border-violet-800 dark:bg-violet-950/40 dark:text-violet-400">
+                            <Lock className="size-2" />
+                            {usage?.hardBlocked ? "Pro" : "Limit reached"}
+                          </span>
+                        )}
+                      </div>
                       <p className="text-xs text-muted-foreground">
                         {action.description}
                       </p>
                     </div>
+                    {/* Usage chip */}
+                    {usage && !usage.hardBlocked && (
+                      <span className={cn(
+                        "shrink-0 text-[10px] font-semibold tabular-nums",
+                        usage.used >= usage.limit
+                          ? "text-destructive"
+                          : "text-muted-foreground",
+                      )}>
+                        {usage.used}/{usage.limit}
+                      </span>
+                    )}
                   </button>
                 );
               })}
+
+              {/* Upgrade nudge for free users */}
+              {!isPro && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setUpgradeFeature(undefined);
+                    setUpgradeUsage(undefined);
+                    setUpgradeOpen(true);
+                  }}
+                  className="mt-1 w-full rounded-xl border border-dashed border-violet-300 bg-violet-50/50 px-4 py-2.5 text-center text-xs font-semibold text-violet-600 transition-colors hover:bg-violet-100/60 dark:border-violet-800 dark:bg-violet-950/20 dark:text-violet-400 dark:hover:bg-violet-950/40"
+                >
+                  <Sparkles className="mr-1.5 inline size-3" />
+                  Upgrade to Pro for more AI credits
+                </button>
+              )}
             </CardContent>
           </Card>
         )}
@@ -314,9 +410,24 @@ export function EditorCopilotPanel({
           <>
             <Card className="shadow-sm">
               <CardHeader className="border-b pb-3 pt-4 px-4">
-                <CardTitle className="text-base font-semibold">
-                  Job Description
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base font-semibold">
+                    Job Description
+                  </CardTitle>
+                  {/* Suggestions usage chip */}
+                  {(() => {
+                    const u = getUsageFor("SUGGESTIONS");
+                    if (!u || u.hardBlocked) return null;
+                    return (
+                      <span className={cn(
+                        "text-[10px] font-semibold tabular-nums",
+                        u.used >= u.limit ? "text-destructive" : "text-muted-foreground",
+                      )}>
+                        {u.used}/{u.limit} suggestions
+                      </span>
+                    );
+                  })()}
+                </div>
               </CardHeader>
               <CardContent className="space-y-3 p-3">
                 <Textarea

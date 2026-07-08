@@ -12,6 +12,7 @@ import { CallToAction } from "@/features/marketing/components/cta";
 import { FeaturesSection } from "@/features/marketing/components/features";
 import Footer from "@/features/marketing/components/footer";
 import { Hero } from "@/features/marketing/components/hero";
+import { PricingSection } from "@/features/marketing/components/pricing";
 import { TestimonialsSection } from "@/features/marketing/components/testimonials";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
 import Image from "next/image";
@@ -138,6 +139,7 @@ export default function LandingPage() {
         <BrandSection />
         <FeaturesSection />
         <TestimonialsSection />
+        <PricingSection id="pricing" />
         <CallToAction />
         <Footer />
       </div>

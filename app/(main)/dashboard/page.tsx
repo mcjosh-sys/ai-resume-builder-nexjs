@@ -1,4 +1,5 @@
 import { PageWrapper } from "@/components/page-wrapper";
+import { PaymentToast } from "@/components/payment-toast";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,6 +13,7 @@ import { ResumesList } from "@/features/resume/components/resumes-list";
 import { currentUser } from "@clerk/nextjs/server";
 import { FileText, Layers } from "lucide-react";
 import Link from "next/link";
+import { Suspense } from "react";
 import { FaArrowRight, FaWandMagic } from "react-icons/fa6";
 
 export default async function DashboardPage() {
@@ -23,6 +25,11 @@ export default async function DashboardPage() {
 
   return (
     <PageWrapper>
+      {/* Payment callback toast (success / failure) */}
+      <Suspense fallback={null}>
+        <PaymentToast />
+      </Suspense>
+
       {/* ── Welcome header ── */}
       <header className="space-y-1">
         <h1 className="text-2xl font-bold tracking-tight">

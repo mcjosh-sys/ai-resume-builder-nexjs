@@ -1,9 +1,41 @@
 "use client";
+import { getCurrentPlan } from "@/features/ai/actions/usage.action";
 import { UserButton } from "@clerk/nextjs";
-import { CreditCard } from "lucide-react";
+import { CreditCard, Sparkles, Zap } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "./theme-toggle";
+
+function PlanBadge() {
+  const [plan, setPlan] = useState<"FREE" | "PRO" | "TEAM" | null>(null);
+
+  useEffect(() => {
+    getCurrentPlan().then((p) => setPlan(p as "FREE" | "PRO" | "TEAM"));
+  }, []);
+
+  if (!plan) return null;
+
+  if (plan === "FREE") {
+    return (
+      <Link
+        href="/#pricing"
+        className="inline-flex items-center gap-1.5 rounded-full border border-violet-200 bg-violet-50 px-2.5 py-1 text-xs font-semibold text-violet-700 transition-colors hover:bg-violet-100 dark:border-violet-800 dark:bg-violet-950/40 dark:text-violet-400 dark:hover:bg-violet-950/60"
+      >
+        <Sparkles className="size-3" />
+        Upgrade to Pro
+      </Link>
+    );
+  }
+
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400">
+      <Zap className="size-3" />
+      {plan === "TEAM" ? "Team" : "Pro"}
+    </span>
+  );
+}
 
 export function Topbar() {
   const pathname = usePathname();
@@ -24,16 +56,14 @@ export function Topbar() {
           <p className="font-bold text-lg sm:text-xl">CVCopilot</p>
         </div>
 
-        {/* Actions & Mobile Menu Button */}
+        {/* Actions */}
         <div className="flex items-center gap-2 sm:gap-4">
+          <PlanBadge />
           <ThemeToggle />
           <UserButton
             appearance={{
               elements: {
-                avatarBox: {
-                  width: 35,
-                  height: 35,
-                },
+                avatarBox: { width: 35, height: 35 },
                 userButtonBox:
                   "border-blue-500 hover:bg-blue-600/10 border-2 rounded-full",
               },

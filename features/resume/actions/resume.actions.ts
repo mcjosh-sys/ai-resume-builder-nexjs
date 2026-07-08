@@ -1,7 +1,16 @@
 "use server";
 import { prisma } from "@/lib/db";
-import { AppError } from "@/lib/errors";
-import { Prisma } from "@/lib/generated/prisma";
+import { AppError, UpgradeRequiredError } from "@/lib/errors";
+import { BorderStyle, Prisma } from "@/lib/generated/prisma";
+import {
+  FREE_BORDER_STYLE,
+  FREE_COLOR,
+  FREE_TEMPLATES,
+} from "@/lib/plans";
+import {
+  checkResumeLimit,
+  getUserPlan,
+} from "@/lib/subscription";
 import { deleteImage, getUserId, uploadImage } from "@/server/action";
 
 export type RawResume = {
@@ -13,6 +22,7 @@ export type RawResume = {
   jobDescription?: string | null;
   atsScore?: number | null;
   colorHex?: string;
+  borderStyle?: BorderStyle;
   template?: string;
   title?: string | null;
   summary?: string | null;
@@ -334,6 +344,35 @@ export async function saveResume(data: RawResume) {
     throw new AppError("Resume not found", { status: 404 });
   }
 
+  // ── Plan gates (creation only) ──────────────────────────────────────────────
+  if (!id) {
+    await checkResumeLimit(userId);
+  }
+
+  // ── Cosmetic gates (creation + updates) ─────────────────────────────────────
+  const plan = await getUserPlan(userId);
+  if (plan === "FREE") {
+    // Block Pro-only templates
+    if (
+      rest.template &&
+      !FREE_TEMPLATES.includes(rest.template as (typeof FREE_TEMPLATES)[number])
+    ) {
+      throw new UpgradeRequiredError(
+        `The "${rest.template}" template requires a Pro plan.`,
+        { feature: "templates", requiredPlan: "PRO" },
+      );
+    }
+    // Lock colour to default
+    if (rest.colorHex && rest.colorHex !== FREE_COLOR) {
+      rest.colorHex = FREE_COLOR;
+    }
+    // Lock border style to Squircle
+    if (rest.borderStyle && rest.borderStyle !== FREE_BORDER_STYLE) {
+      rest.borderStyle = BorderStyle[FREE_BORDER_STYLE as keyof typeof BorderStyle];
+    }
+  }
+
+  // ── Photo handling ──────────────────────────────────────────────────────────
   let newPhotoUrl: string | null | undefined = rest.photoUrl;
   const fileKey = existing?.photoUrl?.split("/").pop();
   if (photo instanceof File) {

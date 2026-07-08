@@ -7,6 +7,18 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Plan {
+  FREE
+  PRO
+  TEAM
+}
+
+enum AIFeature {
+  REWRITE
+  TAILOR
+  SUGGESTIONS
+}
+
 enum SectionType {
   SUMMARY
   SKILLS
@@ -261,18 +273,57 @@ model Award {
 }
 
 model Subscription {
-  id                      String   @id @default(cuid())
-  userId                  String   @unique
-  stripeCustomerId        String   @unique
-  stripeSubscriptionId    String   @unique
-  stripePriceId           String
-  stripeCurrentPeriodEnd  DateTime
-  stripeCancelAtPeriodEnd Boolean  @default(false)
-  createdAt               DateTime @default(now())
-  updatedAt               DateTime @updatedAt
+  id String @id @default(cuid())
+
+  userId String @unique
+  plan   Plan   @default(FREE)
+
+  paystackCustomerCode     String?  @unique
+  paystackSubscriptionCode String?  @unique
+  paystackPlanCode         String?
+  currentPeriodEnd         DateTime?
+  cancelAtPeriodEnd        Boolean  @default(false)
+
+  // Future-proof: Team tier
+  teamId String?
+  team   Team?   @relation(fields: [teamId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@map("user_subscriptions")
+}
+
+model Team {
+  id      String @id @default(cuid())
+  name    String
+  ownerId String
+
+  subscriptions Subscription[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([ownerId])
+  @@map("teams")
+}
+
+model UsageRecord {
+  id     String    @id @default(cuid())
+  userId String
+  feature AIFeature
+
+  count       Int      @default(0)
+  periodStart DateTime // first day of the calendar month
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, feature, periodStart])
+  @@index([userId])
+  @@index([userId, feature])
+  @@map("usage_records")
 }
 
 model APIKey {
