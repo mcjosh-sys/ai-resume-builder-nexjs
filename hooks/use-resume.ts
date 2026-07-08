@@ -6,6 +6,7 @@ import { AddStepInput, Step } from "@/features/editor/types/editor-resume.type";
 import { getResume } from "@/features/resume/actions/resume.actions";
 import { AppError } from "@/lib/errors";
 import { createId } from "@paralleldrive/cuid2";
+import { isEqual } from "lodash";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAutoSaveResume } from "./use-auto-save-resume";
 import { useHistory } from "./use-history";
@@ -34,9 +35,8 @@ export const useResume = ({
   // Non-historical state (loading flags, error, ids, etc.)
   const [meta, setMeta] = useState({
     updatedAt: null as Date | null,
-    isLoading: false,
+    isLoading: !!resumeId, // true from the start when we know we'll fetch
     error: null as AppError | null,
-    loaded: false,
     changeId: null as string | null,
     currentResumeId: resumeId as string | null | undefined,
   });
@@ -65,7 +65,6 @@ export const useResume = ({
 
   const { steps, metadata } = present;
 
-  const isFreshResumeRef = useRef(true);
   const isMountedRef = useRef(true);
 
   const {
@@ -84,6 +83,7 @@ export const useResume = ({
     jobDescription: metadata.jobDescription,
     atsScore: metadata.atsScore,
     lastSaved: meta.updatedAt,
+    isLoading: meta.isLoading,
   });
 
   useEffect(() => {
@@ -100,11 +100,7 @@ export const useResume = ({
     };
   }, []);
 
-  useEffect(() => {
-    if (meta.loaded) {
-      isFreshResumeRef.current = false;
-    }
-  }, [meta.loaded]);
+
 
   useEffect(() => {
     if (!resumeId) return;
@@ -158,6 +154,8 @@ export const useResume = ({
         }
       } finally {
         if (isMountedRef.current) {
+          // isLoading: false is set last — useAutoSaveResume uses isLoading
+          // as a gate to prevent marking changes during the fetch cycle.
           setMeta((prev) => ({ ...prev, isLoading: false }));
         }
       }
@@ -174,24 +172,44 @@ export const useResume = ({
 
   const updateSection = useCallback(
     (step: Pick<Step, "id" | "data">) => {
-      pushHistory((current) => ({
-        ...current,
-        steps: current.steps.map((s) =>
+      let changed = false;
+      pushHistory((current) => {
+        const nextSteps = current.steps.map((s) =>
           s.id === step.id ? { ...s, data: step.data as any } : s,
-        ),
-      }));
-      setMeta((prev) => ({ ...prev, changeId: createId() }));
+        );
+        if (isEqual(current.steps, nextSteps)) {
+          return current;
+        }
+        changed = true;
+        return {
+          ...current,
+          steps: nextSteps,
+        };
+      });
+      if (changed) {
+        setMeta((prev) => ({ ...prev, changeId: createId() }));
+      }
     },
     [pushHistory],
   );
 
   const setSteps = useCallback(
     (updater: Step[] | ((prev: Step[]) => Step[])) => {
-      pushHistory((current) => ({
-        ...current,
-        steps: typeof updater === "function" ? updater(current.steps) : updater,
-      }));
-      setMeta((prev) => ({ ...prev, changeId: createId() }));
+      let changed = false;
+      pushHistory((current) => {
+        const nextSteps = typeof updater === "function" ? updater(current.steps) : updater;
+        if (isEqual(current.steps, nextSteps)) {
+          return current;
+        }
+        changed = true;
+        return {
+          ...current,
+          steps: nextSteps,
+        };
+      });
+      if (changed) {
+        setMeta((prev) => ({ ...prev, changeId: createId() }));
+      }
     },
     [pushHistory],
   );
@@ -221,44 +239,82 @@ export const useResume = ({
   const removeSection = useCallback(
     (stepId: string) => {
       if (!stepId.startsWith("other-field-")) return;
-      pushHistory((current) => ({
-        ...current,
-        steps: current.steps.filter((s) => s.id !== stepId),
-      }));
-      setMeta((prev) => ({ ...prev, changeId: createId() }));
+      let changed = false;
+      pushHistory((current) => {
+        const nextSteps = current.steps.filter((s) => s.id !== stepId);
+        if (current.steps.length === nextSteps.length) {
+          return current;
+        }
+        changed = true;
+        return {
+          ...current,
+          steps: nextSteps,
+        };
+      });
+      if (changed) {
+        setMeta((prev) => ({ ...prev, changeId: createId() }));
+      }
     },
     [pushHistory],
   );
 
   const setTemplate = useCallback(
     (template: string) => {
-      pushHistory((current) => ({
-        ...current,
-        metadata: { ...current.metadata, template },
-      }));
-      setMeta((prev) => ({ ...prev, changeId: createId() }));
+      let changed = false;
+      pushHistory((current) => {
+        if (current.metadata.template === template) {
+          return current;
+        }
+        changed = true;
+        return {
+          ...current,
+          metadata: { ...current.metadata, template },
+        };
+      });
+      if (changed) {
+        setMeta((prev) => ({ ...prev, changeId: createId() }));
+      }
     },
     [pushHistory],
   );
 
   const setColorHex = useCallback(
     (colorHex: string) => {
-      pushHistory((current) => ({
-        ...current,
-        metadata: { ...current.metadata, colorHex },
-      }));
-      setMeta((prev) => ({ ...prev, changeId: createId() }));
+      let changed = false;
+      pushHistory((current) => {
+        if (current.metadata.colorHex === colorHex) {
+          return current;
+        }
+        changed = true;
+        return {
+          ...current,
+          metadata: { ...current.metadata, colorHex },
+        };
+      });
+      if (changed) {
+        setMeta((prev) => ({ ...prev, changeId: createId() }));
+      }
     },
     [pushHistory],
   );
 
   const updateResumeMetadata = useCallback(
     (data: Partial<ResumeMetadata>) => {
-      pushHistory((current) => ({
-        ...current,
-        metadata: { ...current.metadata, ...data },
-      }));
-      setMeta((prev) => ({ ...prev, changeId: createId() }));
+      let changed = false;
+      pushHistory((current) => {
+        const nextMetadata = { ...current.metadata, ...data };
+        if (isEqual(current.metadata, nextMetadata)) {
+          return current;
+        }
+        changed = true;
+        return {
+          ...current,
+          metadata: nextMetadata,
+        };
+      });
+      if (changed) {
+        setMeta((prev) => ({ ...prev, changeId: createId() }));
+      }
     },
     [pushHistory],
   );

@@ -45,6 +45,9 @@ export function useHistory<T>(initialValue: T): HistoryState<T> {
   const push = useCallback((next: T | ((current: T) => T)) => {
     setPresent((current) => {
       const nextValue = typeof next === "function" ? (next as (c: T) => T)(current) : next;
+      if (nextValue === current) {
+        return current;
+      }
       pastRef.current = [...pastRef.current, current].slice(-MAX_HISTORY);
       futureRef.current = [];
       return nextValue;
